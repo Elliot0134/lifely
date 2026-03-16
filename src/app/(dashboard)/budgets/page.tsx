@@ -8,9 +8,8 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Plus, Copy } from 'lucide-react'
+import { BudgetModal } from '@/components/budgets/budget-modal'
+import { BudgetGrid } from '@/components/budgets/budget-grid'
 
 export default function BudgetsPage() {
   return (
@@ -43,103 +42,16 @@ export default function BudgetsPage() {
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">Budgets</h1>
             <p className="text-muted-foreground">
-              Définir et suivre vos objectifs financiers
+              Definir et suivre vos objectifs financiers
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Copy className="mr-2 h-4 w-4" />
-              Copier le mois précédent
-            </Button>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Nouveau budget
-            </Button>
+            <BudgetModal />
           </div>
         </div>
 
-        {/* Sélecteur période */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex gap-4">
-              <div>
-                <label className="text-sm font-medium">Mois</label>
-                <div className="mt-1 p-2 border rounded-md min-w-32">Février 2024</div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Année</label>
-                <div className="mt-1 p-2 border rounded-md min-w-24">2024</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Budget vs Réel */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Budget vs Réel - Février 2024</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Exemple budget 1 */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span>🛒</span>
-                    <span className="font-medium">Alimentation</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium">280€ / 350€</span>
-                    <span className="text-sm text-muted-foreground ml-2">80%</span>
-                  </div>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '80%' }}></div>
-                </div>
-              </div>
-
-              {/* Exemple budget 2 */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span>🚗</span>
-                    <span className="font-medium">Transport</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium">120€ / 150€</span>
-                    <span className="text-sm text-muted-foreground ml-2">80%</span>
-                  </div>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '80%' }}></div>
-                </div>
-              </div>
-
-              {/* Budget dépassé */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span>🎮</span>
-                    <span className="font-medium">Loisirs</span>
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">DÉPASSÉ</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-medium text-red-600">190€ / 100€</span>
-                    <span className="text-sm text-muted-foreground ml-2">190%</span>
-                  </div>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-red-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                </div>
-              </div>
-
-              {/* Message */}
-              <div className="text-center py-4 text-muted-foreground">
-                <p>Les vrais budgets apparaîtront ici une fois la base de données configurée.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Budget Grid */}
+        <BudgetGrid />
       </div>
     </>
   )
