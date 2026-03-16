@@ -10,9 +10,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { CategoryList } from '@/components/categories/category-list'
+import { CategoryGrid } from '@/components/categories/category-grid'
 import { CategoryModal } from '@/components/categories/category-modal'
 
 export default async function CategoriesPage() {
@@ -22,7 +20,7 @@ export default async function CategoriesPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Redirection si non authentifié
+  // Redirection si non authentifie
   if (!user) {
     redirect('/login')
   }
@@ -45,7 +43,7 @@ export default async function CategoriesPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Catégories</BreadcrumbPage>
+                <BreadcrumbPage>Categories</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -55,16 +53,16 @@ export default async function CategoriesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight">Catégories</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
             <p className="text-muted-foreground">
-              Organisez vos transactions par catégories
+              Organisez vos transactions par categories
             </p>
           </div>
           <CategoryModal />
         </div>
 
-        {/* Liste des catégories avec vraies données */}
-        <CategoryList />
+        {/* Category grid */}
+        <CategoryGrid />
       </div>
     </>
   )

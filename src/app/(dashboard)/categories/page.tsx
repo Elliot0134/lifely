@@ -8,9 +8,8 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { CategoryList } from '@/components/categories/category-list'
+import { CategoryGrid } from '@/components/categories/category-grid'
 import { CategoryModal } from '@/components/categories/category-modal'
-import { InitDefaultDataButton } from '@/components/admin/init-default-data-button'
 
 export default function CategoriesPage() {
   return (
@@ -31,7 +30,7 @@ export default function CategoriesPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Catégories</BreadcrumbPage>
+                <BreadcrumbPage>Categories</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -41,21 +40,16 @@ export default function CategoriesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight">Catégories</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
             <p className="text-muted-foreground">
-              Organisez vos transactions par catégories
+              Organisez vos transactions par categories
             </p>
           </div>
           <CategoryModal />
         </div>
 
-        {/* Bouton temporaire pour initialiser les données par défaut */}
-        <div className="flex justify-center">
-          <InitDefaultDataButton />
-        </div>
-
-        {/* Liste dynamique des catégories */}
-        <CategoryList />
+        {/* Category grid */}
+        <CategoryGrid />
       </div>
     </>
   )
