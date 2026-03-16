@@ -8,9 +8,10 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { KPICards } from '@/components/dashboard/kpi-cards'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
+import { RecentTransactions } from '@/components/dashboard/recent-transactions'
+import { ActiveBudgets } from '@/components/dashboard/active-budgets'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -57,20 +58,11 @@ export default async function DashboardPage() {
         {/* Graphiques avec vraies données */}
         <DashboardCharts />
 
-        {/* Message pour l'utilisateur */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              🚀 Lifely est en cours de construction !
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Les données sont factices pour l'instant. Les API routes sont créées et prêtes !
-              Prochaine étape : connecter aux vraies données Supabase.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Transactions récentes + Budgets actifs */}
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+          <RecentTransactions />
+          <ActiveBudgets />
+        </div>
       </div>
     </>
   )

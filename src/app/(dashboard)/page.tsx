@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { KPICards } from '@/components/dashboard/kpi-cards'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
+import { RecentTransactions } from '@/components/dashboard/recent-transactions'
+import { ActiveBudgets } from '@/components/dashboard/active-budgets'
 
 export default function DashboardPage() {
   return (
@@ -42,6 +44,12 @@ export default function DashboardPage() {
 
         {/* Graphiques avec vraies données */}
         <DashboardCharts />
+
+        {/* Transactions récentes + Budgets actifs */}
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+          <RecentTransactions />
+          <ActiveBudgets />
+        </div>
       </div>
     </>
   )
