@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { AnalyticsOverview } from '@/components/analytics/analytics-overview'
+import { AnalyticsContent } from '@/components/analytics/analytics-content'
 
 export default async function AnalyticsPage() {
   const supabase = await createClient()
@@ -57,8 +57,8 @@ export default async function AnalyticsPage() {
           </p>
         </div>
 
-        {/* Overview */}
-        <AnalyticsOverview />
+        {/* Overview + Charts */}
+        <AnalyticsContent />
       </div>
     </>
   )

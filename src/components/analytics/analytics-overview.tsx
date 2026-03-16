@@ -146,8 +146,16 @@ function VariationBadge({
   )
 }
 
-export function AnalyticsOverview() {
-  const [period, setPeriod] = React.useState<PeriodType>("month")
+export type { PeriodType }
+
+export function AnalyticsOverview({
+  period,
+  onPeriodChange,
+}: {
+  period: PeriodType
+  onPeriodChange: (p: PeriodType) => void
+}) {
+  const setPeriod = onPeriodChange
   const [currentData, setCurrentData] = React.useState<PeriodData | null>(null)
   const [previousData, setPreviousData] = React.useState<PeriodData | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
