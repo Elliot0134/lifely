@@ -19,6 +19,29 @@ function ChartSkeleton() {
   )
 }
 
+function TrendsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-6 w-32" />
+      <div className="grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ChartsSkeleton() {
   return (
     <div className="space-y-4">
@@ -30,6 +53,17 @@ function ChartsSkeleton() {
     </div>
   )
 }
+
+const AnalyticsTrends = dynamic(
+  () =>
+    import("./analytics-trends").then((mod) => ({
+      default: mod.AnalyticsTrends,
+    })),
+  {
+    loading: () => <TrendsSkeleton />,
+    ssr: false,
+  }
+)
 
 const AnalyticsCharts = dynamic(
   () =>
@@ -49,6 +83,7 @@ export function AnalyticsContent() {
     <div className="space-y-6">
       <AnalyticsOverview period={period} onPeriodChange={setPeriod} />
       <AnalyticsCharts period={period} />
+      <AnalyticsTrends period={period} />
     </div>
   )
 }
