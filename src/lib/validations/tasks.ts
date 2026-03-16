@@ -141,6 +141,27 @@ export const createRecurringTaskSchema = z.object({
   end_date: z.string().nullable().optional(),
 })
 
+export const updateRecurringTaskSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).max(500).optional(),
+  description: z.string().max(5000).nullable().optional(),
+  project_id: z.string().uuid().nullable().optional(),
+  is_code_task: z.boolean().optional(),
+  urgency: z.enum(["urgent", "important"]).nullable().optional(),
+  estimated_minutes: z.number().int().min(1).max(480).nullable().optional(),
+  ai_instructions: z.string().max(10000).nullable().optional(),
+  frequency: z.enum(["daily", "weekly", "monthly", "yearly"]).optional(),
+  day_of_week: z.number().int().min(0).max(6).nullable().optional(),
+  day_of_month: z.number().int().min(1).max(31).nullable().optional(),
+  month_of_year: z.number().int().min(1).max(12).nullable().optional(),
+  start_date: z.string().optional(),
+  end_date: z.string().nullable().optional(),
+  is_active: z.boolean().optional(),
+})
+
 export type CreateRecurringTaskInput = z.infer<
   typeof createRecurringTaskSchema
+>
+export type UpdateRecurringTaskInput = z.infer<
+  typeof updateRecurringTaskSchema
 >
