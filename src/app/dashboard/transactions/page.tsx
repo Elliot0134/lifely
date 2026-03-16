@@ -11,8 +11,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Plus } from 'lucide-react'
 import { TransactionList } from '@/components/transactions/transaction-list'
+import { TransactionModal } from '@/components/transactions/transaction-modal'
 
 export default async function TransactionsPage() {
   const supabase = await createClient()
@@ -64,6 +65,14 @@ export default async function TransactionsPage() {
               <RotateCcw className="mr-2 h-4 w-4" />
               Récurrences
             </Button>
+            <TransactionModal
+              trigger={
+                <Button size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle transaction
+                </Button>
+              }
+            />
           </div>
         </div>
 
