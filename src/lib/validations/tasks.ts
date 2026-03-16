@@ -101,7 +101,14 @@ export const createTagSchema = z.object({
   color: z.string().optional().default("#64748b"),
 })
 
+export const updateTagSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1, "Le nom est obligatoire").max(50).optional(),
+  color: z.string().optional(),
+})
+
 export type CreateTagInput = z.infer<typeof createTagSchema>
+export type UpdateTagInput = z.infer<typeof updateTagSchema>
 
 // ── Comment schema ──────────────────────────────────────────────
 
