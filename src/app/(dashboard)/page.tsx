@@ -7,12 +7,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  PiggyBank,
-} from 'lucide-react'
+import { KPICards } from '@/components/dashboard/kpi-cards'
 
 export default function DashboardPage() {
   return (
@@ -42,68 +37,8 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Revenus
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+3 200 €</div>
-              <p className="text-xs text-muted-foreground">
-                +5.2% par rapport au mois dernier
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Dépenses
-              </CardTitle>
-              <TrendingDown className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">-2 100 €</div>
-              <p className="text-xs text-muted-foreground">
-                -3.1% par rapport au mois dernier
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Épargne
-              </CardTitle>
-              <PiggyBank className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+500 €</div>
-              <p className="text-xs text-muted-foreground">
-                +10% par rapport au mois dernier
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Solde net
-              </CardTitle>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+600 €</div>
-              <p className="text-xs text-muted-foreground">
-                Situation financière positive
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* KPI Cards avec vraies données Supabase */}
+        <KPICards />
 
         {/* Zone pour les graphiques (à implémenter avec les vraies données) */}
         <div className="grid gap-4 md:grid-cols-2">
@@ -129,21 +64,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Message pour l'utilisateur */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              🚀 Lifely est en cours de construction !
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Les données sont factices pour l'instant. Une fois la base de données créée,
-              vous pourrez ajouter vos vraies transactions et voir vos statistiques financières.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </>
   )

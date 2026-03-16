@@ -9,13 +9,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  PiggyBank,
-} from 'lucide-react'
-import { DashboardKPIs } from '@/components/dashboard/dashboard-kpis'
+import { KPICards } from '@/components/dashboard/kpi-cards'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 
 export default async function DashboardPage() {
@@ -57,8 +51,8 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {/* KPI Cards avec vraies données */}
-        <DashboardKPIs />
+        {/* KPI Cards avec vraies données Supabase */}
+        <KPICards />
 
         {/* Graphiques avec vraies données */}
         <DashboardCharts />
