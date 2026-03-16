@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 
 import { useTasks } from '@/lib/queries/tasks'
 import { TaskList, TaskListSkeleton } from '@/components/tasks/task-list'
+import { RecurringTaskList } from '@/components/tasks/recurring-task-list'
 
 export default function TasksPage() {
   // Fetch top-level tasks only (no subtasks)
@@ -77,6 +78,9 @@ export default function TasksPage() {
 
         {/* Task list */}
         {!isLoading && !error && tasks && <TaskList tasks={tasks} />}
+
+        {/* Recurring tasks section */}
+        <RecurringTaskList />
       </div>
     </>
   )
