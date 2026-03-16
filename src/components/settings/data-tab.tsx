@@ -18,6 +18,7 @@ import {
 import { Loader2, Download, CreditCard, Trash2, AlertTriangle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import { getFreePlan, formatPlanPrice } from "@/config/plans"
 
 export function DataTab() {
   const router = useRouter()
@@ -232,20 +233,27 @@ export function DataTab() {
       </Card>
 
       {/* Billing Placeholder */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634] opacity-60">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <CreditCard className="h-5 w-5 text-muted-foreground" />
-            <div className="flex items-center gap-2">
-              <CardTitle>Abonnement</CardTitle>
-              <Badge variant="secondary">Plan Gratuit</Badge>
-            </div>
-          </div>
-          <CardDescription>
-            Des plans premium arrivent bientôt avec des fonctionnalités avancées.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      {/* TODO: Replace with dynamic subscription data from Supabase/Stripe */}
+      {(() => {
+        const currentPlan = getFreePlan()
+        return (
+          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634] opacity-60">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <CardTitle>Abonnement</CardTitle>
+                  <Badge variant="secondary">{currentPlan.name} — {formatPlanPrice(currentPlan)}</Badge>
+                </div>
+              </div>
+              <CardDescription>
+                {currentPlan.description}{" "}
+                Des plans premium arrivent bientôt avec des fonctionnalités avancées.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )
+      })()}
 
       {/* Danger Zone */}
       <Card className="bg-destructive/5 border border-destructive/20 shadow-none">

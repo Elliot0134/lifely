@@ -1,5 +1,8 @@
 // types/index.ts
 
+// Re-export billing types from config/plans
+export type { BillingPeriod, PlanId, SubscriptionStatus, Plan, Subscription, PlanLimits, PlanPrice } from '@/config/plans'
+
 export type TransactionType = 'revenue' | 'variable_expense' | 'fixed_expense' | 'credit' | 'savings'
 export type RecurrenceFrequency = 'monthly' | 'weekly' | 'yearly'
 export type AccountType = 'personal' | 'business'
