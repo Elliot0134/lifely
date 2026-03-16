@@ -6,8 +6,8 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { KPICards } from '@/components/dashboard/kpi-cards'
+import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 
 export default function DashboardPage() {
   return (
@@ -40,30 +40,8 @@ export default function DashboardPage() {
         {/* KPI Cards avec vraies données Supabase */}
         <KPICards />
 
-        {/* Zone pour les graphiques (à implémenter avec les vraies données) */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenus vs Dépenses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center bg-muted/50 rounded-lg">
-                <p className="text-muted-foreground">Graphique à venir</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Répartition des dépenses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center bg-muted/50 rounded-lg">
-                <p className="text-muted-foreground">Graphique à venir</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Graphiques avec vraies données */}
+        <DashboardCharts />
       </div>
     </>
   )
