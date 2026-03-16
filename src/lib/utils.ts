@@ -17,7 +17,7 @@ export function formatCurrency(amount: number, type?: TransactionType): string {
 
   // Ajouter le signe selon le type
   if (type === 'revenue') return `+${formatted}`
-  if (type && type !== 'revenue') return `-${formatted}`
+  if (type) return `-${formatted}`
   return formatted
 }
 
@@ -39,11 +39,11 @@ export function formatDateRelative(date: string | Date): string {
 
 export function getTransactionTypeColor(type: TransactionType): string {
   const colors = {
-    revenue: 'hsl(142 76% 36%)',          // Vert - revenus
-    variable_expense: 'hsl(24 95% 53%)',  // Orange - dépenses variables
-    fixed_expense: 'hsl(217 91% 60%)',    // Bleu - charges fixes
-    credit: 'hsl(0 84% 60%)',             // Rouge - crédits
-    savings: 'hsl(187 85% 53%)',          // Cyan - épargne
+    revenue: '#8b9a6b',          // Olive sage - revenus
+    variable_expense: '#f26a4b', // Terracotta - depenses variables
+    fixed_expense: '#8e8a83',    // Warm gray - charges fixes
+    credit: '#c45c5c',           // Muted red - credits
+    savings: '#a89f8f',          // Warm beige - epargne
   }
   return colors[type]
 }
@@ -60,7 +60,7 @@ export function getTransactionTypeLabel(type: TransactionType): string {
 }
 
 export function getBudgetStatusColor(percentageUsed: number): string {
-  if (percentageUsed < 80) return 'hsl(142 76% 36%)'    // Vert
-  if (percentageUsed < 100) return 'hsl(38 92% 50%)'   // Orange
-  return 'hsl(0 84% 60%)'                               // Rouge
+  if (percentageUsed < 80) return '#8b9a6b'    // Olive sage
+  if (percentageUsed < 100) return '#d4a76a'   // Warm amber
+  return '#c45c5c'                              // Muted red
 }

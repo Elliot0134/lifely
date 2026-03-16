@@ -6,6 +6,7 @@ import {
   BarChart3,
   Building2,
   CalendarClock,
+  ChartPie,
   CreditCard,
   FolderKanban,
   ListTodo,
@@ -109,6 +110,12 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         url: "/dashboard/companies",
         icon: Building2,
         isActive: pathname.startsWith("/dashboard/companies"),
+      },
+      {
+        title: "Statistiques",
+        url: "/dashboard/tasks/stats",
+        icon: ChartPie,
+        isActive: pathname.startsWith("/dashboard/tasks/stats"),
       },
     ],
     navSecondary: [

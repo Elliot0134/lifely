@@ -41,6 +41,42 @@ export const BUDGET_STATUS_COLORS = {
   exceeded: 'var(--color-budget-exceeded)',
 } as const
 
+// ─── Default Categories ─────────────────────────────────────────────────────
+
+export const DEFAULT_CATEGORIES: {
+  name: string
+  icon: string
+  color: string
+  transaction_type: TransactionType
+}[] = [
+  // Revenue
+  { name: 'Salaire', icon: '💰', color: '#22c55e', transaction_type: 'revenue' },
+  { name: 'Freelance', icon: '💻', color: '#16a34a', transaction_type: 'revenue' },
+  { name: 'Autres revenus', icon: '📥', color: '#15803d', transaction_type: 'revenue' },
+  // Variable expenses
+  { name: 'Alimentation', icon: '🛒', color: '#f97316', transaction_type: 'variable_expense' },
+  { name: 'Transport', icon: '🚗', color: '#ef4444', transaction_type: 'variable_expense' },
+  { name: 'Loisirs', icon: '🎮', color: '#8b5cf6', transaction_type: 'variable_expense' },
+  { name: 'Shopping', icon: '🛍️', color: '#ec4899', transaction_type: 'variable_expense' },
+  { name: 'Restaurants', icon: '🍽️', color: '#f59e0b', transaction_type: 'variable_expense' },
+  { name: 'Santé', icon: '🏥', color: '#14b8a6', transaction_type: 'variable_expense' },
+  // Fixed expenses
+  { name: 'Loyer', icon: '🏠', color: '#3b82f6', transaction_type: 'fixed_expense' },
+  { name: 'Électricité', icon: '⚡', color: '#eab308', transaction_type: 'fixed_expense' },
+  { name: 'Internet', icon: '📡', color: '#6366f1', transaction_type: 'fixed_expense' },
+  { name: 'Téléphone', icon: '📱', color: '#a855f7', transaction_type: 'fixed_expense' },
+  { name: 'Assurance', icon: '🛡️', color: '#64748b', transaction_type: 'fixed_expense' },
+  { name: 'Abonnements', icon: '📺', color: '#0ea5e9', transaction_type: 'fixed_expense' },
+  // Credits
+  { name: 'Crédit immobilier', icon: '🏘️', color: '#dc2626', transaction_type: 'credit' },
+  { name: 'Crédit auto', icon: '🚘', color: '#b91c1c', transaction_type: 'credit' },
+  { name: 'Crédit conso', icon: '💳', color: '#991b1b', transaction_type: 'credit' },
+  // Savings
+  { name: 'Livret A', icon: '🏦', color: '#22d3ee', transaction_type: 'savings' },
+  { name: 'Investissements', icon: '📈', color: '#06b6d4', transaction_type: 'savings' },
+  { name: 'Épargne projet', icon: '🎯', color: '#0891b2', transaction_type: 'savings' },
+]
+
 // ─── Task Management ─────────────────────────────────────────────────────────
 
 export const COMPANY_STATUSES = [
