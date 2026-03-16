@@ -4,7 +4,11 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import {
   BarChart3,
+  Building2,
+  CalendarClock,
   CreditCard,
+  FolderKanban,
+  ListTodo,
   Target,
   Tag,
   Settings,
@@ -17,6 +21,7 @@ import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -80,6 +85,32 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         isActive: pathname.startsWith("/dashboard/analytics"),
       },
     ],
+    navOrganisation: [
+      {
+        title: "Tâches",
+        url: "/dashboard/tasks",
+        icon: ListTodo,
+        isActive: pathname === "/dashboard/tasks",
+      },
+      {
+        title: "Planning",
+        url: "/dashboard/tasks/schedule",
+        icon: CalendarClock,
+        isActive: pathname.startsWith("/dashboard/tasks/schedule"),
+      },
+      {
+        title: "Projets",
+        url: "/dashboard/projects",
+        icon: FolderKanban,
+        isActive: pathname.startsWith("/dashboard/projects"),
+      },
+      {
+        title: "Entreprises",
+        url: "/dashboard/companies",
+        icon: Building2,
+        isActive: pathname.startsWith("/dashboard/companies"),
+      },
+    ],
     navSecondary: [
       {
         title: "Paramètres",
@@ -121,12 +152,16 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} label="Finances" />
+        <NavMain items={data.navOrganisation} label="Organisation" />
         <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <div className="flex items-center justify-between px-2 py-1">
+          <NavUser user={data.user} />
+          <ThemeToggle />
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
