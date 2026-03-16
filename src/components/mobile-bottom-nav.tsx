@@ -10,6 +10,7 @@ import {
   Tags,
   Menu,
   Settings,
+  LineChart,
   X,
 } from "lucide-react"
 
@@ -41,6 +42,11 @@ const navItems = [
 ] as const
 
 const submenuItems = [
+  {
+    label: "Analytiques",
+    href: "/dashboard/analytics",
+    icon: LineChart,
+  },
   {
     label: "Paramètres",
     href: "/dashboard/settings",
