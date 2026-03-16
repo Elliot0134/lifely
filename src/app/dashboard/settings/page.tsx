@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SettingsContent } from '@/components/settings/settings-content'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -19,7 +20,6 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Redirection si non authentifié
   if (!user) {
     redirect('/login')
   }
@@ -42,54 +42,15 @@ export default async function SettingsPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Paramètres</BreadcrumbPage>
+                <BreadcrumbPage>Parametres</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        {/* Header */}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Paramètres</h1>
-          <p className="text-muted-foreground">
-            Configurez votre profil et vos préférences
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profil utilisateur</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <div className="mt-1 p-2 border rounded-md text-muted-foreground">
-                    {user.email}
-                  </div>
-                </div>
-                <div className="text-center py-4 text-muted-foreground text-sm">
-                  Édition de profil à implémenter
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Comptes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p>API route accounts créée ! ({2} comptes trouvés)</p>
-                <p className="text-sm mt-2">Prochaine étape : afficher avec useAccounts().</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <Suspense fallback={null}>
+        <SettingsContent />
+      </Suspense>
     </>
   )
 }
