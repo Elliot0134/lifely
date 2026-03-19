@@ -145,6 +145,22 @@ export async function deleteComment(id: string) {
       throw new Error('Non autorisé')
     }
 
+    // Check if comment is a Claude comment — users cannot delete those
+    const { data: comment, error: fetchError } = await supabase
+      .from('task_comments')
+      .select('author_type')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError || !comment) {
+      throw new Error('Commentaire introuvable')
+    }
+
+    if (comment.author_type === 'claude') {
+      throw new Error('Les commentaires de Claude ne peuvent pas être supprimés')
+    }
+
     // Supprimer en base (RLS ensures user can only delete their own)
     const { error } = await supabase
       .from('task_comments')
