@@ -48,7 +48,7 @@ export async function getDailyBriefing(): Promise<{
       .from('tasks')
       .select('*, project:projects(id, name, color, status)')
       .eq('user_id', user.id)
-      .eq('is_completed', false)
+      .neq('status', 'completed')
       .order('due_date', { ascending: true, nullsFirst: false })
 
     if (tasksError) throw new Error(tasksError.message)
@@ -58,7 +58,7 @@ export async function getDailyBriefing(): Promise<{
       .from('tasks')
       .select('id')
       .eq('user_id', user.id)
-      .eq('is_completed', true)
+      .eq('status', 'completed')
       .gte('completed_at', `${todayStr}T00:00:00`)
       .lte('completed_at', `${todayStr}T23:59:59`)
 
@@ -168,7 +168,7 @@ export async function getTaskStats(): Promise<{
       .from('tasks')
       .select('id, completed_at, is_code_task, project_id')
       .eq('user_id', user.id)
-      .eq('is_completed', true)
+      .eq('status', 'completed')
       .gte('completed_at', twoMonthsAgo.toISOString())
       .order('completed_at', { ascending: false })
 
@@ -177,7 +177,7 @@ export async function getTaskStats(): Promise<{
     // Fetch all tasks for by_project breakdown
     const { data: allTasks, error: allError } = await supabase
       .from('tasks')
-      .select('id, project_id, is_completed, is_code_task, created_at')
+      .select('id, project_id, status, is_code_task, created_at')
       .eq('user_id', user.id)
       .not('project_id', 'is', null)
 
@@ -276,7 +276,7 @@ export async function getTaskStats(): Promise<{
         open: 0,
       }
       entry.total++
-      if (t.is_completed) {
+      if (t.status === 'completed') {
         entry.completed++
       } else {
         entry.open++
