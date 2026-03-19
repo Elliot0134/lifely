@@ -4,8 +4,8 @@
 
 export type CompanyStatus = 'not_started' | 'active' | 'completed'
 export type ProjectStatus = 'not_started' | 'in_progress' | 'completed'
-export type TaskUrgency = 'urgent' | 'important'
-export type TaskDueStatus = 'completed' | 'no_date' | 'overdue' | 'today' | 'upcoming' | 'future'
+export type TaskStatus = 'todo' | 'in_progress' | 'completed'
+export type TaskDueStatus = 'no_date' | 'overdue' | 'today' | 'upcoming' | 'future'
 export type CommentAuthorType = 'user' | 'claude'
 export type TaskRecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -18,6 +18,7 @@ export interface Company {
   status: CompanyStatus
   color: string | null
   icon: string | null
+  is_personal: boolean
   created_at: string
   updated_at: string
   // Computed
@@ -61,11 +62,13 @@ export interface Task {
   parent_task_id: string | null
   title: string
   description: string | null
-  is_completed: boolean
+  body: string | null
+  status: TaskStatus
   is_code_task: boolean
   due_date: string | null
   due_datetime: string | null
-  urgency: TaskUrgency | null
+  is_urgent: boolean
+  is_important: boolean
   sort_order: number
   estimated_minutes: number | null
   scheduled_date: string | null
@@ -108,7 +111,8 @@ export interface RecurringTask {
   title: string
   description: string | null
   is_code_task: boolean
-  urgency: TaskUrgency | null
+  is_urgent: boolean
+  is_important: boolean
   estimated_minutes: number | null
   ai_instructions: string | null
   frequency: TaskRecurrenceFrequency
@@ -136,7 +140,8 @@ export interface CreateTaskInput {
   is_code_task?: boolean
   due_date?: string
   due_datetime?: string
-  urgency?: TaskUrgency
+  is_urgent?: boolean
+  is_important?: boolean
   estimated_minutes?: number
   scheduled_date?: string
   scheduled_start_time?: string
@@ -151,11 +156,12 @@ export interface UpdateTaskInput {
   description?: string
   project_id?: string | null
   parent_task_id?: string | null
-  is_completed?: boolean
+  status?: TaskStatus
   is_code_task?: boolean
   due_date?: string | null
   due_datetime?: string | null
-  urgency?: TaskUrgency | null
+  is_urgent?: boolean
+  is_important?: boolean
   sort_order?: number
   estimated_minutes?: number | null
   scheduled_date?: string | null
@@ -215,7 +221,8 @@ export interface CreateRecurringTaskInput {
   description?: string
   project_id?: string
   is_code_task?: boolean
-  urgency?: TaskUrgency
+  is_urgent?: boolean
+  is_important?: boolean
   estimated_minutes?: number
   ai_instructions?: string
   frequency: TaskRecurrenceFrequency
@@ -232,7 +239,8 @@ export interface UpdateRecurringTaskInput {
   description?: string | null
   project_id?: string | null
   is_code_task?: boolean
-  urgency?: TaskUrgency | null
+  is_urgent?: boolean
+  is_important?: boolean
   estimated_minutes?: number | null
   ai_instructions?: string | null
   frequency?: TaskRecurrenceFrequency
@@ -249,9 +257,10 @@ export interface UpdateRecurringTaskInput {
 export interface TaskFilters {
   project_id?: string
   company_id?: string
-  is_completed?: boolean
+  status?: TaskStatus
   is_code_task?: boolean
-  urgency?: TaskUrgency
+  is_urgent?: boolean
+  is_important?: boolean
   due_status?: TaskDueStatus
   tag_ids?: string[]
   search?: string
