@@ -34,7 +34,7 @@ export async function createProject(
 
     // Insert project
     const { data, error } = await supabase
-      .from('task_projects')
+      .from('projects')
       .insert({
         name: validated.name,
         description: validated.description ?? null,
@@ -52,7 +52,7 @@ export async function createProject(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: data as Project }
   } catch (error) {
@@ -85,7 +85,7 @@ export async function updateProject(
 
     // Update project (RLS ensures user can only update their own)
     const { data, error } = await supabase
-      .from('task_projects')
+      .from('projects')
       .update(updateFields)
       .eq('id', id)
       .eq('user_id', user.id)
@@ -96,7 +96,7 @@ export async function updateProject(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: data as Project }
   } catch (error) {
@@ -130,7 +130,7 @@ export async function deleteProject(
 
     // Delete project (RLS ensures user can only delete their own)
     const { error } = await supabase
-      .from('task_projects')
+      .from('projects')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)
@@ -139,7 +139,7 @@ export async function deleteProject(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: { id } }
   } catch (error) {

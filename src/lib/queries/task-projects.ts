@@ -18,7 +18,7 @@ async function fetchProjects(filters: { company_id?: string; status?: string } =
   const supabase = createClient()
 
   let query = supabase
-    .from('task_projects')
+    .from('projects')
     .select('*, company:companies(*)')
     .order('name', { ascending: true })
 
@@ -42,7 +42,7 @@ async function fetchProject(id: string): Promise<Project> {
   const supabase = createClient()
 
   const { data, error } = await supabase
-    .from('task_projects')
+    .from('projects')
     .select('*, company:companies(*)')
     .eq('id', id)
     .single()
@@ -63,7 +63,7 @@ async function createProject(input: CreateProjectInput): Promise<Project> {
   }
 
   const { data, error } = await supabase
-    .from('task_projects')
+    .from('projects')
     .insert({
       name: input.name,
       description: input.description ?? null,
@@ -90,7 +90,7 @@ async function updateProject(input: UpdateProjectInput): Promise<Project> {
   const { id, ...updates } = input
 
   const { data, error } = await supabase
-    .from('task_projects')
+    .from('projects')
     .update(updates)
     .eq('id', id)
     .select('*, company:companies(*)')
@@ -107,7 +107,7 @@ async function deleteProject(id: string): Promise<void> {
   const supabase = createClient()
 
   const { error } = await supabase
-    .from('task_projects')
+    .from('projects')
     .delete()
     .eq('id', id)
 
