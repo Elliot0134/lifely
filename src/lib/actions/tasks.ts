@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createTaskSchema, updateTaskSchema } from '@/lib/validations/tasks'
-import type { CreateTaskInput, UpdateTaskInput, Task } from '@/types/tasks'
+import type { CreateTaskInput, UpdateTaskInput, Task, TaskStatus } from '@/types/tasks'
 
 interface ActionResponse<T = Task> {
   success: boolean
@@ -33,12 +33,13 @@ export async function createTask(
     // Separate tag_ids from task fields
     const { tag_ids, ...taskFields } = validated
 
-    // Insert task
+    // Insert task with status:'todo' by default
     const { data, error } = await supabase
       .from('tasks')
       .insert({
         ...taskFields,
         user_id: user.id,
+        status: 'todo' as const,
       })
       .select()
       .single()
@@ -63,7 +64,7 @@ export async function createTask(
       }
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data }
   } catch (error) {
@@ -94,12 +95,20 @@ export async function updateTask(
     const validated = updateTaskSchema.parse(input)
     const { id, tag_ids, ...updateFields } = validated
 
+    // Set completed_at when status changes to 'completed'
+    const fieldsToUpdate: Record<string, unknown> = { ...updateFields }
+    if (updateFields.status === 'completed') {
+      fieldsToUpdate.completed_at = new Date().toISOString()
+    } else if (updateFields.status) {
+      fieldsToUpdate.completed_at = null
+    }
+
     // Update task fields (only if there are fields to update)
     let data: Task | null = null
-    if (Object.keys(updateFields).length > 0) {
+    if (Object.keys(fieldsToUpdate).length > 0) {
       const { data: updatedTask, error } = await supabase
         .from('tasks')
-        .update(updateFields)
+        .update(fieldsToUpdate)
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
@@ -153,7 +162,7 @@ export async function updateTask(
       }
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: data ?? undefined }
   } catch (error) {
@@ -194,7 +203,7 @@ export async function deleteTask(id: string): Promise<ActionResponse<null>> {
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: null }
   } catch (error) {
@@ -206,7 +215,10 @@ export async function deleteTask(id: string): Promise<ActionResponse<null>> {
   }
 }
 
-export async function toggleTask(id: string): Promise<ActionResponse> {
+export async function updateTaskStatus(
+  id: string,
+  status: TaskStatus
+): Promise<ActionResponse> {
   try {
     const supabase = await createClient()
 
@@ -224,25 +236,18 @@ export async function toggleTask(id: string): Promise<ActionResponse> {
       throw new Error('ID invalide')
     }
 
-    // Fetch current state
-    const { data: current, error: fetchError } = await supabase
-      .from('tasks')
-      .select('is_completed')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (fetchError) {
-      throw new Error(fetchError.message)
+    // Validate status
+    const validStatuses: TaskStatus[] = ['todo', 'in_progress', 'completed']
+    if (!validStatuses.includes(status)) {
+      throw new Error('Statut invalide')
     }
 
-    // Toggle is_completed
-    const newCompleted = !current.is_completed
+    // Update status and completed_at
     const { data, error } = await supabase
       .from('tasks')
       .update({
-        is_completed: newCompleted,
-        completed_at: newCompleted ? new Date().toISOString() : null,
+        status,
+        completed_at: status === 'completed' ? new Date().toISOString() : null,
       })
       .eq('id', id)
       .eq('user_id', user.id)
@@ -253,11 +258,11 @@ export async function toggleTask(id: string): Promise<ActionResponse> {
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data }
   } catch (error) {
-    console.error('Erreur toggle task:', error)
+    console.error('Erreur update task status:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur inconnue',
@@ -303,7 +308,7 @@ export async function reorderTasks(
       }
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: null }
   } catch (error) {
@@ -337,6 +342,7 @@ export async function bulkCreateTasks(
     const taskRows = validated.map(({ tag_ids: _tag_ids, ...taskFields }) => ({
       ...taskFields,
       user_id: user.id,
+      status: 'todo' as const,
     }))
 
     const { data, error } = await supabase
@@ -367,7 +373,7 @@ export async function bulkCreateTasks(
       }
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data }
   } catch (error) {
@@ -407,7 +413,7 @@ export async function bulkDeleteTasks(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: null }
   } catch (error) {
@@ -419,14 +425,14 @@ export async function bulkDeleteTasks(
   }
 }
 
-const bulkToggleSchema = z.object({
+const bulkUpdateStatusSchema = z.object({
   ids: z.array(z.string().uuid()).min(1),
-  is_completed: z.boolean(),
+  status: z.enum(['todo', 'in_progress', 'completed']),
 })
 
-export async function bulkToggleTasks(
+export async function bulkUpdateStatus(
   ids: string[],
-  is_completed: boolean
+  status: TaskStatus
 ): Promise<ActionResponse<null>> {
   try {
     const supabase = await createClient()
@@ -439,13 +445,13 @@ export async function bulkToggleTasks(
       throw new Error('Non autorisé')
     }
 
-    const validated = bulkToggleSchema.parse({ ids, is_completed })
+    const validated = bulkUpdateStatusSchema.parse({ ids, status })
 
     const { error } = await supabase
       .from('tasks')
       .update({
-        is_completed: validated.is_completed,
-        completed_at: validated.is_completed
+        status: validated.status,
+        completed_at: validated.status === 'completed'
           ? new Date().toISOString()
           : null,
       })
@@ -456,11 +462,11 @@ export async function bulkToggleTasks(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data: null }
   } catch (error) {
-    console.error('Erreur bulk toggle tasks:', error)
+    console.error('Erreur bulk update status:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur inconnue',
@@ -512,7 +518,7 @@ export async function scheduleTask(input: {
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data }
   } catch (error) {
@@ -558,7 +564,7 @@ export async function unscheduleTask(
       throw new Error(error.message)
     }
 
-    revalidatePath('/dashboard/tasks')
+    revalidatePath('/tasks')
 
     return { success: true, data }
   } catch (error) {
