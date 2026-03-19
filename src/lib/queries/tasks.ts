@@ -5,7 +5,7 @@ import {
   createTask,
   updateTask,
   deleteTask,
-  toggleTask,
+  updateTaskStatus,
   reorderTasks,
   scheduleTask,
   unscheduleTask,
@@ -13,6 +13,7 @@ import {
 import type {
   Task,
   TaskFilters,
+  TaskStatus,
   CreateTaskInput,
   UpdateTaskInput,
 } from '@/types/tasks'
@@ -46,14 +47,17 @@ async function fetchTasks(filters: TaskFilters = {}): Promise<Task[]> {
   if (filters.company_id) {
     query = query.eq('company_id', filters.company_id)
   }
-  if (filters.is_completed !== undefined) {
-    query = query.eq('is_completed', filters.is_completed)
+  if (filters.status) {
+    query = query.eq('status', filters.status)
   }
   if (filters.is_code_task !== undefined) {
     query = query.eq('is_code_task', filters.is_code_task)
   }
-  if (filters.urgency) {
-    query = query.eq('urgency', filters.urgency)
+  if (filters.is_urgent !== undefined) {
+    query = query.eq('is_urgent', filters.is_urgent)
+  }
+  if (filters.is_important !== undefined) {
+    query = query.eq('is_important', filters.is_important)
   }
   if (filters.due_status) {
     query = query.eq('due_status', filters.due_status)
@@ -236,14 +240,14 @@ export function useDeleteTask() {
   })
 }
 
-export function useToggleTask() {
+export function useUpdateTaskStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const result = await toggleTask(id)
+    mutationFn: async (input: { id: string; status: TaskStatus }) => {
+      const result = await updateTaskStatus(input)
       if (!result.success) {
-        throw new Error(result.error ?? 'Erreur lors du toggle')
+        throw new Error(result.error ?? 'Erreur lors du changement de statut')
       }
       return result.data!
     },
