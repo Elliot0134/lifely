@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { createPersonalCompany } from '@/lib/actions/companies'
 import type { Company, CreateCompanyInput, UpdateCompanyInput } from '@/types/tasks'
 
 // Query Keys Factory
@@ -18,6 +19,7 @@ async function fetchCompanies(): Promise<Company[]> {
   const { data, error } = await supabase
     .from('companies')
     .select('*')
+    .order('is_personal', { ascending: false })
     .order('name', { ascending: true })
 
   if (error) {
@@ -162,4 +164,34 @@ export function useDeleteCompany() {
       toast.error(error.message)
     },
   })
+}
+
+/**
+ * Ensures a personal company exists for the current user.
+ * Creates one if missing. Returns the personal company data.
+ */
+export async function ensurePersonalCompany(): Promise<Company | null> {
+  const supabase = createClient()
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) return null
+
+  // Check if personal company already exists
+  const { data: existing } = await supabase
+    .from('companies')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('is_personal', true)
+    .maybeSingle()
+
+  if (existing) return existing as Company
+
+  // Create via server action
+  const result = await createPersonalCompany(user.id)
+  if (!result.success) return null
+
+  return result.data as Company
 }
