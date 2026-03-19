@@ -16,17 +16,87 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Pencil, ListChecks, Calendar } from 'lucide-react'
 
 import { useProject } from '@/lib/queries/task-projects'
-import { useTasks } from '@/lib/queries/tasks'
+import { useTasks, useUpdateTaskStatus } from '@/lib/queries/tasks'
 import { PROJECT_STATUSES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { ProjectModal } from '@/components/projects/project-modal-tasks'
-import { TaskList, TaskListSkeleton, TaskListEmpty } from '@/components/tasks/task-list'
 import { TaskQuickAdd } from '@/components/tasks/task-quick-add'
-import type { Project } from '@/types/tasks'
+import type { Project, Task } from '@/types/tasks'
+
+// ─── Inline task list components (formerly in task-list.tsx) ────
+
+function ProjectTaskItem({ task }: { task: Task }) {
+  const updateStatus = useUpdateTaskStatus()
+  const isCompleted = task.status === 'completed'
+  const dueLabel = task.due_date
+    ? new Date(task.due_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    : null
+
+  return (
+    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent/50 transition-colors">
+      <Checkbox
+        checked={isCompleted}
+        onCheckedChange={() =>
+          updateStatus.mutate({
+            id: task.id,
+            status: isCompleted ? 'todo' : 'completed',
+          })
+        }
+        disabled={updateStatus.isPending}
+        aria-label={`Marquer "${task.title}" comme ${isCompleted ? 'non completee' : 'completee'}`}
+      />
+      <span className={cn('flex-1 text-sm truncate', isCompleted && 'line-through text-muted-foreground')}>
+        {task.title}
+      </span>
+      {dueLabel && (
+        <span className="text-xs text-muted-foreground shrink-0 flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          {dueLabel}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function TaskListSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+          <Skeleton className="h-4 w-4 rounded-[4px]" />
+          <Skeleton className="h-4 flex-1 max-w-[200px]" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function TaskListEmpty() {
+  return (
+    <div className="text-center text-muted-foreground py-8">
+      <ListChecks className="mx-auto h-10 w-10 mb-3 opacity-50" />
+      <p className="text-sm">Aucune tache dans ce projet</p>
+    </div>
+  )
+}
+
+function ProjectTaskList({ tasks }: { tasks: Task[] }) {
+  return (
+    <div className="space-y-0.5">
+      {tasks.map((task) => (
+        <ProjectTaskItem key={task.id} task={task} />
+      ))}
+    </div>
+  )
+}
+
+// ─── Helpers ──────────────────────────────────────────────
 
 function getStatusConfig(status: string) {
   return PROJECT_STATUSES.find((s) => s.value === status) ?? PROJECT_STATUSES[0]
@@ -80,7 +150,7 @@ export default function ProjectDetailPage() {
     return (
       <>
         <Header projectName={undefined} />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
           <ProjectDetailSkeleton />
         </div>
       </>
@@ -91,7 +161,7 @@ export default function ProjectDetailPage() {
     return (
       <>
         <Header projectName={undefined} />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
           <Card className="bg-card">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <p className="text-destructive mb-4">
@@ -112,14 +182,14 @@ export default function ProjectDetailPage() {
 
   const statusConfig = getStatusConfig(project.status)
   const taskCount = project.task_count ?? tasks?.length ?? 0
-  const completedCount = project.completed_task_count ?? tasks?.filter((t) => t.is_completed).length ?? 0
+  const completedCount = project.completed_task_count ?? tasks?.filter((t) => t.status === 'completed').length ?? 0
   const progress = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0
 
   return (
     <>
       <Header projectName={project.name} />
 
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
         {/* Back link */}
         <div>
           <Button asChild variant="ghost" size="sm" className="-ml-2">
@@ -255,7 +325,7 @@ export default function ProjectDetailPage() {
             {tasksLoading ? (
               <TaskListSkeleton />
             ) : tasks && tasks.length > 0 ? (
-              <TaskList tasks={tasks} />
+              <ProjectTaskList tasks={tasks} />
             ) : (
               <TaskListEmpty />
             )}
@@ -281,7 +351,7 @@ export default function ProjectDetailPage() {
 
 function Header({ projectName }: { projectName: string | undefined }) {
   return (
-    <header className="sticky top-0 z-50 bg-background/20 backdrop-blur-md rounded-xl p-1.5 md:rounded-none md:p-0 md:border-b flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+    <header className="sticky top-0 z-50 bg-background/20 backdrop-blur-md rounded-xl p-1.5 md:rounded-b-none md:p-0 md:border-b flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator

@@ -44,7 +44,7 @@ import { TagSelect } from '@/components/tags/tag-select'
 import { createTaskSchema } from '@/lib/validations/tasks'
 import { useCreateTask, useUpdateTask } from '@/lib/queries/tasks'
 import { useProjects } from '@/lib/queries/task-projects'
-import { TASK_URGENCIES, TIME_ESTIMATION_PRESETS } from '@/lib/constants'
+import { TIME_ESTIMATION_PRESETS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { Task, CreateTaskInput, UpdateTaskInput } from '@/types/tasks'
 
@@ -83,11 +83,7 @@ export function TaskModal({
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Strip null urgency for the API
-      const payload: CreateTaskInput = {
-        ...data,
-        urgency: data.urgency ?? undefined,
-      }
+      const payload: CreateTaskInput = { ...data }
 
       if (isEditMode && task) {
         const updateData: UpdateTaskInput = {
@@ -232,35 +228,33 @@ export function TaskModal({
                 )}
               />
 
-              {/* Urgency */}
-              <FormField
-                control={form.control}
-                name="urgency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Urgence</FormLabel>
-                    <Select
-                      value={field.value ?? 'none'}
-                      onValueChange={(v) => field.onChange(v === 'none' ? null : v)}
-                    >
+              {/* Urgency toggles */}
+              <div className="flex items-center gap-4">
+                <FormField
+                  control={form.control}
+                  name="is_urgent"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2">
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Aucune" />
-                        </SelectTrigger>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Aucune</SelectItem>
-                        {TASK_URGENCIES.map((u) => (
-                          <SelectItem key={u.value} value={u.value}>
-                            {u.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormLabel className="!mt-0">Urgent</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="is_important"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2">
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormLabel className="!mt-0">Important</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Code task switch */}
@@ -376,7 +370,8 @@ function getDefaultValues(
       project_id: task.project_id ?? undefined,
       is_code_task: task.is_code_task,
       due_date: task.due_date ?? undefined,
-      urgency: task.urgency ?? undefined,
+      is_urgent: task.is_urgent,
+      is_important: task.is_important,
       estimated_minutes: task.estimated_minutes ?? undefined,
       tag_ids: task.tags?.map((t) => t.id) ?? [],
     }
@@ -388,7 +383,8 @@ function getDefaultValues(
     project_id: defaultProjectId,
     is_code_task: false,
     due_date: undefined,
-    urgency: undefined,
+    is_urgent: undefined,
+    is_important: undefined,
     estimated_minutes: undefined,
     tag_ids: [],
   }

@@ -43,7 +43,6 @@ import {
   RECURRENCE_FREQUENCIES,
   DAYS_OF_WEEK,
   TIME_ESTIMATION_PRESETS,
-  TASK_URGENCIES,
   MONTHS,
 } from '@/lib/constants'
 import type { RecurringTask, TaskRecurrenceFrequency } from '@/types/tasks'
@@ -82,7 +81,8 @@ export function RecurringTaskModal({
       day_of_month: recurringTask?.day_of_month ?? undefined,
       month_of_year: recurringTask?.month_of_year ?? undefined,
       is_code_task: recurringTask?.is_code_task ?? false,
-      urgency: recurringTask?.urgency ?? undefined,
+      is_urgent: recurringTask?.is_urgent ?? false,
+      is_important: recurringTask?.is_important ?? false,
       estimated_minutes: recurringTask?.estimated_minutes ?? undefined,
       start_date: recurringTask?.start_date ?? new Date().toISOString().split('T')[0],
       end_date: recurringTask?.end_date ?? undefined,
@@ -111,7 +111,8 @@ export function RecurringTaskModal({
         day_of_month: recurringTask?.day_of_month ?? undefined,
         month_of_year: recurringTask?.month_of_year ?? undefined,
         is_code_task: recurringTask?.is_code_task ?? false,
-        urgency: recurringTask?.urgency ?? undefined,
+        is_urgent: recurringTask?.is_urgent ?? false,
+        is_important: recurringTask?.is_important ?? false,
         estimated_minutes: recurringTask?.estimated_minutes ?? undefined,
         start_date: recurringTask?.start_date ?? new Date().toISOString().split('T')[0],
         end_date: recurringTask?.end_date ?? undefined,
@@ -150,7 +151,8 @@ export function RecurringTaskModal({
           day_of_month: cleaned.day_of_month ?? null,
           month_of_year: cleaned.month_of_year ?? null,
           is_code_task: cleaned.is_code_task,
-          urgency: cleaned.urgency ?? null,
+          is_urgent: cleaned.is_urgent,
+          is_important: cleaned.is_important,
           estimated_minutes: cleaned.estimated_minutes ?? null,
           start_date: cleaned.start_date,
           end_date: cleaned.end_date || null,
@@ -166,7 +168,8 @@ export function RecurringTaskModal({
           day_of_month: cleaned.day_of_month ?? undefined,
           month_of_year: cleaned.month_of_year ?? undefined,
           is_code_task: cleaned.is_code_task,
-          urgency: cleaned.urgency ?? undefined,
+          is_urgent: cleaned.is_urgent,
+          is_important: cleaned.is_important,
           estimated_minutes: cleaned.estimated_minutes ?? undefined,
           start_date: cleaned.start_date || undefined,
           end_date: cleaned.end_date ?? undefined,
@@ -394,36 +397,36 @@ export function RecurringTaskModal({
               />
             )}
 
-            {/* Urgency + Estimated time row */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Urgency toggles */}
+            <div className="flex items-center gap-3">
               <FormField
                 control={form.control}
-                name="urgency"
+                name="is_urgent"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Urgence</FormLabel>
-                    <Select
-                      value={field.value ?? '_none'}
-                      onValueChange={(v) => field.onChange(v === '_none' ? undefined : v)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Aucune" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="_none">Aucune</SelectItem>
-                        {TASK_URGENCIES.map((u) => (
-                          <SelectItem key={u.value} value={u.value}>
-                            {u.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="flex items-center gap-2">
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="!mt-0">Urgent</FormLabel>
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="is_important"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2">
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="!mt-0">Important</FormLabel>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Estimated time */}
+            <div className="grid grid-cols-2 gap-3">
 
               <FormField
                 control={form.control}

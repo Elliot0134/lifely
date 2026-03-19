@@ -3,7 +3,6 @@
 import { Clock, Code } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { TASK_URGENCIES } from "@/lib/constants"
 import type { Task } from "@/types/tasks"
 
 import { Badge } from "@/components/ui/badge"
@@ -41,9 +40,6 @@ export function TaskTimeBlock({
   className,
 }: TaskTimeBlockProps) {
   const isCode = task.is_code_task
-  const urgencyConfig = task.urgency
-    ? TASK_URGENCIES.find((u) => u.value === task.urgency)
-    : null
 
   return (
     <button
@@ -56,7 +52,7 @@ export function TaskTimeBlock({
         isCode
           ? "border-blue-500/30 bg-blue-500/10 text-blue-950 dark:text-blue-100"
           : "border-slate-500/30 bg-slate-500/10 text-slate-950 dark:text-slate-100",
-        task.is_completed && "opacity-50",
+        task.status === "completed" && "opacity-50",
         className
       )}
       style={style}
@@ -68,7 +64,7 @@ export function TaskTimeBlock({
           <p
             className={cn(
               "text-sm font-medium leading-tight truncate",
-              task.is_completed && "line-through"
+              task.status === "completed" && "line-through"
             )}
           >
             {task.title}
@@ -98,17 +94,20 @@ export function TaskTimeBlock({
             )}
 
             {/* Urgency */}
-            {urgencyConfig && (
+            {task.is_urgent && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1 py-0"
-                style={{
-                  borderColor: `${urgencyConfig.color}50`,
-                  backgroundColor: `${urgencyConfig.color}15`,
-                  color: urgencyConfig.color,
-                }}
+                className="text-[10px] px-1 py-0 border-red-500/50 bg-red-500/15 text-red-600 dark:text-red-400"
               >
-                {urgencyConfig.label}
+                Urgent
+              </Badge>
+            )}
+            {task.is_important && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1 py-0 border-amber-500/50 bg-amber-500/15 text-amber-600 dark:text-amber-400"
+              >
+                Important
               </Badge>
             )}
 

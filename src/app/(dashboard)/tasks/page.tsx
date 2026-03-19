@@ -21,7 +21,7 @@ import { useTasks, useUpdateTaskStatus } from '@/lib/queries/tasks'
 import { TaskToolbar } from '@/components/tasks/task-toolbar'
 import { TaskBoard, TaskBoardSkeleton } from '@/components/tasks/task-board'
 import { TaskTable, TaskTableSkeleton } from '@/components/tasks/task-table'
-import { TaskDetailPanel } from '@/components/tasks/task-detail-panel'
+import { TaskDetailSheet } from '@/components/tasks/task-detail-sheet'
 import { TaskModal } from '@/components/tasks/task-modal'
 import type { Task, TaskStatus } from '@/types/tasks'
 
@@ -72,17 +72,10 @@ export default function TasksPage() {
   // ─── UI state ─────────────────────────────────────────
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [editTask, setEditTask] = useState<Task | null>(null)
-
   // ─── Handlers ─────────────────────────────────────────
   const updateStatus = useUpdateTaskStatus()
   const handleStatusChange = (taskId: string, status: TaskStatus) => {
     updateStatus.mutate({ id: taskId, status })
-  }
-
-  const handleEdit = (task: Task) => {
-    setSelectedTask(null)
-    setEditTask(task)
   }
 
   // ─── Derived state ────────────────────────────────────
@@ -234,13 +227,12 @@ export default function TasksPage() {
       </div>
 
       {/* ─── Detail panel (Sheet) ────────────────────────── */}
-      <TaskDetailPanel
+      <TaskDetailSheet
         task={selectedTask}
         open={!!selectedTask}
         onOpenChange={(open) => {
           if (!open) setSelectedTask(null)
         }}
-        onEdit={handleEdit}
       />
 
       {/* ─── Create modal ────────────────────────────────── */}
@@ -249,14 +241,6 @@ export default function TasksPage() {
         onOpenChange={setCreateModalOpen}
       />
 
-      {/* ─── Edit modal ──────────────────────────────────── */}
-      <TaskModal
-        open={!!editTask}
-        onOpenChange={(open) => {
-          if (!open) setEditTask(null)
-        }}
-        task={editTask}
-      />
     </>
   )
 }

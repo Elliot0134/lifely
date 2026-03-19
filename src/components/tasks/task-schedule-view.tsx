@@ -9,8 +9,10 @@ import type { Task } from "@/types/tasks"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { TaskTimeBlock } from "@/components/tasks/task-time-block"
-import { TaskItem } from "@/components/tasks/task-item"
+import { useUpdateTaskStatus } from "@/lib/queries/tasks"
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -61,6 +63,71 @@ function getBlockPosition(task: Task): {
   return { top, height: Math.max(height, 36) } // min 36px for readability
 }
 
+// ─── Simple inline task item for schedule lists ─────────
+
+function ScheduleTaskItem({
+  task,
+  onSelect,
+}: {
+  task: Task
+  onSelect?: (task: Task) => void
+}) {
+  const updateStatus = useUpdateTaskStatus()
+  const toggleCompleted = () => {
+    updateStatus.mutate({
+      id: task.id,
+      status: task.status === "completed" ? "todo" : "completed",
+    })
+  }
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect?.(task)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onSelect?.(task)
+        }
+      }}
+      className={cn(
+        "flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50 cursor-pointer",
+        task.status === "completed" && "opacity-60"
+      )}
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleCompleted()
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Checkbox
+          checked={task.status === "completed"}
+          aria-label={`Marquer "${task.title}" comme ${task.status === "completed" ? "non completee" : "completee"}`}
+        />
+      </div>
+      <span
+        className={cn(
+          "flex-1 text-sm font-medium truncate",
+          task.status === "completed" && "line-through text-muted-foreground"
+        )}
+      >
+        {task.title}
+      </span>
+      {task.project_name && (
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 hidden sm:inline-flex">
+          <span
+            className="h-1.5 w-1.5 rounded-full mr-1"
+            style={{ backgroundColor: task.project_color ?? "#64748b" }}
+          />
+          {task.project_name}
+        </Badge>
+      )}
+    </div>
+  )
+}
+
 // ─── Component ──────────────────────────────────────────
 
 export function TaskScheduleView({ date, onTaskSelect }: TaskScheduleViewProps) {
@@ -74,13 +141,13 @@ export function TaskScheduleView({ date, onTaskSelect }: TaskScheduleViewProps) 
   const {
     data: allUnscheduledTasks,
     isLoading: loadingUnscheduled,
-  } = useTasks({ is_completed: false, parent_task_id: null })
+  } = useTasks({ parent_task_id: null })
 
   // Filter unscheduled: tasks without a scheduled_date
   const unscheduledTasks = useMemo(
     () =>
       (allUnscheduledTasks ?? []).filter(
-        (t) => !t.scheduled_date
+        (t) => !t.scheduled_date && t.status !== "completed"
       ),
     [allUnscheduledTasks]
   )
@@ -194,7 +261,7 @@ export function TaskScheduleView({ date, onTaskSelect }: TaskScheduleViewProps) 
                   </h4>
                   <div className="space-y-1.5">
                     {dateOnly.map((task) => (
-                      <TaskItem
+                      <ScheduleTaskItem
                         key={task.id}
                         task={task}
                         onSelect={onTaskSelect}
@@ -235,7 +302,7 @@ export function TaskScheduleView({ date, onTaskSelect }: TaskScheduleViewProps) 
           ) : (
             <div className="space-y-1.5">
               {unscheduledTasks.map((task) => (
-                <TaskItem
+                <ScheduleTaskItem
                   key={task.id}
                   task={task}
                   onSelect={onTaskSelect}

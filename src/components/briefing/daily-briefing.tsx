@@ -185,7 +185,7 @@ export function DailyBriefing() {
                 label="Completees aujourd'hui"
                 value={stats.completed_today}
                 icon={CheckCircle2}
-                color={TASK_DUE_STATUS_COLORS.completed}
+                color="hsl(142 76% 36%)"
               />
               <StatCard
                 label="En retard"

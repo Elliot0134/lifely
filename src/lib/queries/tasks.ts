@@ -245,7 +245,7 @@ export function useUpdateTaskStatus() {
 
   return useMutation({
     mutationFn: async (input: { id: string; status: TaskStatus }) => {
-      const result = await updateTaskStatus(input)
+      const result = await updateTaskStatus(input.id, input.status)
       if (!result.success) {
         throw new Error(result.error ?? 'Erreur lors du changement de statut')
       }

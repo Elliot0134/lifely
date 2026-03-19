@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { useSubtasks, useToggleTask, useCreateTask, taskKeys } from "@/lib/queries/tasks"
+import { useSubtasks, useUpdateTaskStatus, useCreateTask, taskKeys } from "@/lib/queries/tasks"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -23,22 +23,25 @@ interface SubtaskListProps {
 export function SubtaskList({ parentTaskId, className }: SubtaskListProps) {
   const queryClient = useQueryClient()
   const { data: subtasks = [], isLoading } = useSubtasks(parentTaskId)
-  const toggleTask = useToggleTask()
+  const updateStatus = useUpdateTaskStatus()
   const createTask = useCreateTask()
 
   const [newTitle, setNewTitle] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const completedCount = subtasks.filter((t) => t.is_completed).length
+  const completedCount = subtasks.filter((t) => t.status === "completed").length
   const totalCount = subtasks.length
   const progressValue = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
-  const handleToggle = (taskId: string) => {
-    toggleTask.mutate(taskId, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: taskKeys.subtasks(parentTaskId) })
-      },
-    })
+  const handleToggle = (subtask: { id: string; status: string }) => {
+    updateStatus.mutate(
+      { id: subtask.id, status: subtask.status === "completed" ? "todo" : "completed" },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: taskKeys.subtasks(parentTaskId) })
+        },
+      }
+    )
   }
 
   const handleCreate = () => {
@@ -93,14 +96,14 @@ export function SubtaskList({ parentTaskId, className }: SubtaskListProps) {
           className="flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50"
         >
           <Checkbox
-            checked={subtask.is_completed}
-            onCheckedChange={() => handleToggle(subtask.id)}
-            aria-label={`Marquer "${subtask.title}" comme ${subtask.is_completed ? "non complétée" : "complétée"}`}
+            checked={subtask.status === "completed"}
+            onCheckedChange={() => handleToggle(subtask)}
+            aria-label={`Marquer "${subtask.title}" comme ${subtask.status === "completed" ? "non complétée" : "complétée"}`}
           />
           <span
             className={cn(
               "text-sm leading-tight",
-              subtask.is_completed && "line-through text-muted-foreground"
+              subtask.status === "completed" && "line-through text-muted-foreground"
             )}
           >
             {subtask.title}

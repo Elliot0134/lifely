@@ -38,7 +38,7 @@ import {
   useUpdateRecurringTask,
   useDeleteRecurringTask,
 } from '@/lib/queries/recurring-tasks'
-import { RECURRENCE_FREQUENCIES, TASK_URGENCIES } from '@/lib/constants'
+import { RECURRENCE_FREQUENCIES } from '@/lib/constants'
 import { RecurringTaskModal } from './recurring-task-modal'
 import type { RecurringTask } from '@/types/tasks'
 
@@ -74,7 +74,18 @@ function RecurringTaskItem({ task, onEdit, onDelete }: RecurringTaskItemProps) {
     })
   }
 
-  const urgency = TASK_URGENCIES.find((u) => u.value === task.urgency)
+  const urgencyLabel = task.is_urgent && task.is_important
+    ? 'Urgent & Important'
+    : task.is_urgent
+      ? 'Urgent'
+      : task.is_important
+        ? 'Important'
+        : null
+  const urgencyColor = task.is_urgent
+    ? 'hsl(0 84% 60%)'
+    : task.is_important
+      ? 'hsl(45 93% 47%)'
+      : null
 
   return (
     <div className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50">
@@ -99,13 +110,13 @@ function RecurringTaskItem({ task, onEdit, onDelete }: RecurringTaskItemProps) {
           {task.is_code_task && (
             <Code2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           )}
-          {urgency && (
+          {urgencyLabel && (
             <Badge
               variant="outline"
               className="text-xs shrink-0"
-              style={{ borderColor: urgency.color, color: urgency.color }}
+              style={{ borderColor: urgencyColor!, color: urgencyColor! }}
             >
-              {urgency.label}
+              {urgencyLabel}
             </Badge>
           )}
         </div>

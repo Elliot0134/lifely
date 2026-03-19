@@ -104,6 +104,12 @@ export const EISENHOWER_QUADRANTS = [
   { key: 'none', label: 'Aucune urgence', color: 'hsl(0 0% 63%)' },
 ] as const
 
+export const TASK_URGENCIES = [
+  { value: 'urgent_important', label: 'Urgent & Important', color: 'hsl(0 84% 60%)' },
+  { value: 'urgent', label: 'Urgent', color: 'hsl(24 95% 53%)' },
+  { value: 'important', label: 'Important', color: 'hsl(45 93% 47%)' },
+] as const
+
 export const TASK_DUE_STATUS_COLORS = {
   overdue: 'hsl(0 84% 60%)',
   today: 'hsl(217 91% 60%)',
