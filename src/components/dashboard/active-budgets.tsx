@@ -18,7 +18,7 @@ interface BudgetRow {
 
 function BudgetsSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader className="pb-4">
         <Skeleton className="h-5 w-36" />
       </CardHeader>
@@ -38,9 +38,9 @@ function BudgetsSkeleton() {
 }
 
 function getBudgetBarColor(percentage: number): string {
-  if (percentage < 80) return 'hsl(142 76% 36%)'   // Green
-  if (percentage <= 100) return 'hsl(38 92% 50%)'   // Orange
-  return 'hsl(0 84% 60%)'                            // Red
+  if (percentage < 80) return '#8b9a6b'   // Green
+  if (percentage <= 100) return '#d4a76a'   // Orange
+  return '#c45c5c'                            // Red
 }
 
 export function ActiveBudgets() {
@@ -85,7 +85,7 @@ export function ActiveBudgets() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">{error}</p>
         </CardContent>
@@ -94,7 +94,7 @@ export function ActiveBudgets() {
   }
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader className="pb-4">
         <CardTitle className="text-base font-semibold">Budgets actifs</CardTitle>
       </CardHeader>

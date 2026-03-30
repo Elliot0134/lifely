@@ -210,7 +210,6 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: taskKeys.detail(input.id) })
       queryClient.invalidateQueries({ queryKey: ['briefing'] })
       queryClient.invalidateQueries({ queryKey: ['taskStats'] })
-      toast.success('Tâche mise à jour')
     },
     onError: (error: Error) => {
       toast.error(error.message)

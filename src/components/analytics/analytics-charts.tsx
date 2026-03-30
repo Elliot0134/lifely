@@ -33,19 +33,19 @@ const MONTH_LABELS = [
 ]
 
 const FALLBACK_COLORS = [
-  "hsl(24 95% 53%)",
-  "hsl(217 91% 60%)",
-  "hsl(0 84% 60%)",
-  "hsl(187 85% 53%)",
-  "hsl(262 83% 58%)",
-  "hsl(38 92% 50%)",
-  "hsl(330 81% 60%)",
-  "hsl(142 76% 36%)",
+  "#f26a4b",
+  "#8e8a83",
+  "#c45c5c",
+  "#a89f8f",
+  "#5c5a56",
+  "#d4a76a",
+  "#7a6b5d",
+  "#8b9a6b",
 ]
 
 function ChartSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <Skeleton className="h-5 w-48" />
       </CardHeader>
@@ -226,7 +226,7 @@ function MonthlyEvolutionChart({ period }: { period: PeriodType }) {
   const hasData = data.some((d) => d.revenue > 0 || d.expenses > 0)
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <CardTitle className="text-base">Evolution mensuelle</CardTitle>
       </CardHeader>
@@ -238,13 +238,13 @@ function MonthlyEvolutionChart({ period }: { period: PeriodType }) {
               <XAxis
                 dataKey="label"
                 fontSize={12}
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 fontSize={12}
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) =>
@@ -257,8 +257,8 @@ function MonthlyEvolutionChart({ period }: { period: PeriodType }) {
                   value === "revenue" ? "Revenus" : "Depenses"
                 }
               />
-              <Bar dataKey="revenue" fill="hsl(142 76% 36%)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expenses" fill="hsl(24 95% 53%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" fill="#8b9a6b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expenses" fill="#f26a4b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -381,7 +381,7 @@ function CategoryDonutChart({ period }: { period: PeriodType }) {
           chartData.push({
             name: "Autres",
             value: Math.abs(restTotal),
-            color: "hsl(var(--muted-foreground))",
+            color: "var(--muted-foreground)",
             percentage: (Math.abs(restTotal) / grandTotal) * 100,
           })
         }
@@ -401,7 +401,7 @@ function CategoryDonutChart({ period }: { period: PeriodType }) {
   if (isLoading) return <ChartSkeleton />
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <CardTitle className="text-base">Repartition des depenses</CardTitle>
       </CardHeader>
@@ -527,7 +527,7 @@ function TopCategoriesChart({ period }: { period: PeriodType }) {
   if (isLoading) return <ChartSkeleton />
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <CardTitle className="text-base">Top 5 depenses par categorie</CardTitle>
       </CardHeader>
@@ -543,7 +543,7 @@ function TopCategoriesChart({ period }: { period: PeriodType }) {
               <XAxis
                 type="number"
                 fontSize={12}
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) =>
@@ -554,7 +554,7 @@ function TopCategoriesChart({ period }: { period: PeriodType }) {
                 type="category"
                 dataKey="name"
                 fontSize={12}
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
                 width={120}

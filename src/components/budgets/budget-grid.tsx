@@ -52,22 +52,22 @@ interface BudgetVsReal {
 type StatusFilter = 'all' | 'active' | 'completed' | 'exceeded'
 
 function getProgressColor(percentage: number): string {
-  if (percentage < 80) return 'bg-green-500'
-  if (percentage <= 100) return 'bg-orange-500'
-  return 'bg-red-500'
+  if (percentage < 80) return 'bg-[#8b9a6b]'
+  if (percentage <= 100) return 'bg-[#d4a76a]'
+  return 'bg-[#c45c5c]'
 }
 
 function getStatusBadge(percentage: number) {
   if (percentage > 100) {
     return (
-      <span className="text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">
+      <span className="text-xs bg-[#c45c5c]/15 text-[#c45c5c] px-2 py-0.5 rounded-full font-medium">
         DEPASSE
       </span>
     )
   }
   if (percentage >= 80) {
     return (
-      <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium">
+      <span className="text-xs bg-[#d4a76a]/15 text-[#d4a76a] px-2 py-0.5 rounded-full font-medium">
         ATTENTION
       </span>
     )
@@ -239,7 +239,7 @@ export function BudgetGrid() {
 
       {/* Empty state */}
       {budgets.length === 0 ? (
-        <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card className="bg-card">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="rounded-full bg-muted p-4 mb-4">
               <Wallet className="h-10 w-10 text-muted-foreground" />
@@ -260,7 +260,7 @@ export function BudgetGrid() {
           </CardContent>
         </Card>
       ) : filteredBudgets.length === 0 ? (
-        <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card className="bg-card">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-muted-foreground">
               Aucun budget ne correspond au filtre selectionne.
@@ -281,7 +281,7 @@ export function BudgetGrid() {
             return (
               <Card
                 key={`${categoryId}-${budget.account_id}`}
-                className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]"
+                className="bg-card"
               >
                 <CardContent className="p-5">
                   {/* Header: icon + name + actions */}
@@ -321,7 +321,7 @@ export function BudgetGrid() {
                             Modifier
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-red-600 focus:text-red-600"
+                            className="text-destructive focus:text-destructive"
                             onClick={() => handleDelete(categoryId)}
                             disabled={deleting === categoryId}
                           >
@@ -363,10 +363,10 @@ export function BudgetGrid() {
                         className={cn(
                           'text-xl font-bold',
                           percentage > 100
-                            ? 'text-red-500'
+                            ? 'text-[#c45c5c]'
                             : percentage >= 80
-                              ? 'text-orange-500'
-                              : 'text-green-500'
+                              ? 'text-[#d4a76a]'
+                              : 'text-[#8b9a6b]'
                         )}
                       >
                         {Math.round(percentage)}%

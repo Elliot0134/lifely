@@ -8,12 +8,20 @@ import { TASK_STATUSES, EISENHOWER_QUADRANTS, TASK_DUE_STATUS_COLORS } from '@/l
 
 export type ViewMode = 'kanban' | 'table'
 export type GroupBy = 'project' | 'status' | 'due_status' | 'urgency' | 'company' | 'none'
+export type SubGroupBy = 'status' | 'urgency' | 'none'
 export type SortBy = 'due_date' | 'title' | 'urgency' | 'created_at'
+
+export interface TaskSubGroup {
+  label: string
+  color: string
+  tasks: Task[]
+}
 
 export interface TaskGroup {
   label: string
   color: string
   tasks: Task[]
+  subGroups?: Map<string, TaskSubGroup>
 }
 
 // ─── Due status labels ───────────────────────────────
@@ -24,6 +32,40 @@ const DUE_STATUS_LABELS: Record<string, string> = {
   upcoming: 'À venir',
   future: 'Plus tard',
   no_date: 'Sans date',
+}
+
+// ─── Sub-group builder ───────────────────────────────
+
+function buildSubGroups(tasks: Task[], by: SubGroupBy): Map<string, TaskSubGroup> {
+  const subs = new Map<string, TaskSubGroup>()
+
+  if (by === 'status') {
+    for (const s of TASK_STATUSES) {
+      subs.set(s.value, { label: s.label, color: s.color, tasks: [] })
+    }
+    for (const task of tasks) {
+      subs.get(task.status)?.tasks.push(task)
+    }
+  } else if (by === 'urgency') {
+    for (const q of EISENHOWER_QUADRANTS) {
+      subs.set(q.key, { label: q.label, color: q.color, tasks: [] })
+    }
+    for (const task of tasks) {
+      let key: string
+      if (task.is_urgent && task.is_important) key = 'urgent_important'
+      else if (task.is_urgent) key = 'urgent'
+      else if (task.is_important) key = 'important'
+      else key = 'none'
+      subs.get(key)?.tasks.push(task)
+    }
+  }
+
+  // Remove empty sub-groups
+  for (const [key, sub] of subs) {
+    if (sub.tasks.length === 0) subs.delete(key)
+  }
+
+  return subs
 }
 
 // ─── Hook ────────────────────────────────────────────
@@ -42,6 +84,7 @@ function getStoredViewMode(): ViewMode {
 export function useTasksView() {
   const [viewMode, setViewModeState] = useState<ViewMode>(getStoredViewMode)
   const [groupBy, setGroupBy] = useState<GroupBy>('project')
+  const [subGroupBy, setSubGroupBy] = useState<SubGroupBy>('none')
   const [sortBy, setSortBy] = useState<SortBy>('created_at')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [filters, setFilters] = useState<TaskFilters>({})
@@ -147,9 +190,16 @@ export function useTasksView() {
         }
       }
 
+      // Apply sub-grouping if enabled
+      if (subGroupBy !== 'none' && subGroupBy !== groupBy) {
+        for (const [, group] of groups) {
+          group.subGroups = buildSubGroups(group.tasks, subGroupBy)
+        }
+      }
+
       return groups
     },
-    [groupBy]
+    [groupBy, subGroupBy]
   )
 
   // ─── sortTasks ───────────────────────────────────
@@ -201,6 +251,7 @@ export function useTasksView() {
     // State
     viewMode,
     groupBy,
+    subGroupBy,
     sortBy,
     sortOrder,
     filters,
@@ -208,6 +259,7 @@ export function useTasksView() {
     // Setters
     setViewMode,
     setGroupBy,
+    setSubGroupBy,
     setSortBy,
     toggleSortOrder,
     setFilters,

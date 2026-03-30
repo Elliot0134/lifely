@@ -129,11 +129,11 @@ function VariationBadge({
   const isPositive = variation > 0
   const color = invertColor
     ? isPositive
-      ? "text-red-500"
-      : "text-emerald-500"
+      ? "text-[#c45c5c]"
+      : "text-[#8b9a6b]"
     : isPositive
-      ? "text-emerald-500"
-      : "text-red-500"
+      ? "text-[#8b9a6b]"
+      : "text-[#c45c5c]"
 
   const Icon = isPositive ? ArrowUpRight : ArrowDownRight
 
@@ -237,15 +237,15 @@ export function AnalyticsOverview({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Total Revenue */}
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+          <Card className="bg-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Revenus
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
+              <TrendingUp className="h-4 w-4 text-[#8b9a6b]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="text-2xl font-bold text-[#8b9a6b]">
                 {formatCurrency(currentData?.totalRevenue ?? 0)}
               </div>
               <div className="mt-1 flex items-center gap-1.5">
@@ -258,15 +258,15 @@ export function AnalyticsOverview({
           </Card>
 
           {/* Total Expenses */}
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+          <Card className="bg-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Dépenses
               </CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 text-[#c45c5c]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <div className="text-2xl font-bold text-[#c45c5c]">
                 {formatCurrency(currentData?.totalExpenses ?? 0)}
               </div>
               <div className="mt-1 flex items-center gap-1.5">
@@ -279,19 +279,19 @@ export function AnalyticsOverview({
           </Card>
 
           {/* Net Balance */}
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634] sm:col-span-2 lg:col-span-1">
+          <Card className="bg-card sm:col-span-2 lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Solde net
               </CardTitle>
-              <Wallet className="h-4 w-4 text-blue-500" />
+              <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div
                 className={`text-2xl font-bold ${
                   (currentData?.netBalance ?? 0) >= 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-red-600 dark:text-red-400"
+                    ? "text-[#8b9a6b]"
+                    : "text-[#c45c5c]"
                 }`}
               >
                 {formatCurrency(currentData?.netBalance ?? 0)}

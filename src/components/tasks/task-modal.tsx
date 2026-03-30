@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, CalendarIcon, Code2 } from 'lucide-react'
+import { Loader2, CalendarIcon, ChevronDown, Code2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { z } from 'zod'
@@ -31,7 +31,6 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -39,6 +38,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { TagSelect } from '@/components/tags/tag-select'
 
 import { createTaskSchema } from '@/lib/validations/tasks'
@@ -68,6 +72,7 @@ export function TaskModal({
   const createMutation = useCreateTask()
   const updateMutation = useUpdateTask()
   const { data: projects = [] } = useProjects()
+  const [showMore, setShowMore] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createTaskSchema),
@@ -78,8 +83,9 @@ export function TaskModal({
   useEffect(() => {
     if (open) {
       form.reset(getDefaultValues(task, defaultProjectId))
+      setShowMore(isEditMode)
     }
-  }, [open, task, defaultProjectId, form])
+  }, [open, task, defaultProjectId, form, isEditMode])
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -104,7 +110,7 @@ export function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
             {isEditMode ? 'Modifier la tâche' : 'Nouvelle tâche'}
@@ -119,28 +125,12 @@ export function TaskModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Titre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Refactorer le composant..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Détails de la tâche..."
-                      rows={3}
+                    <Input
+                      placeholder="Titre de la tâche..."
+                      className="text-base"
+                      autoFocus
                       {...field}
-                      value={field.value ?? ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -148,71 +138,69 @@ export function TaskModal({
               )}
             />
 
-            {/* Project */}
-            <FormField
-              control={form.control}
-              name="project_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Projet</FormLabel>
-                  <Select
-                    value={field.value ?? 'none'}
-                    onValueChange={(v) => field.onChange(v === 'none' ? undefined : v)}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Aucun projet" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Aucun projet</SelectItem>
-                      {projects.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          <div className="flex items-center gap-2">
-                            {p.color && (
-                              <div
-                                className="h-2.5 w-2.5 rounded-full shrink-0"
-                                style={{ backgroundColor: p.color }}
-                              />
-                            )}
-                            {p.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Compact row: Project + Due date */}
+            <div className="flex gap-2">
+              {/* Project */}
+              <FormField
+                control={form.control}
+                name="project_id"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <Select
+                      value={field.value ?? 'none'}
+                      onValueChange={(v) => field.onChange(v === 'none' ? undefined : v)}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Projet" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Aucun projet</SelectItem>
+                        {projects.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <div className="flex items-center gap-2">
+                              {p.color && (
+                                <div
+                                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: p.color }}
+                                />
+                              )}
+                              {p.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Due date + Urgency row */}
-            <div className="grid grid-cols-2 gap-3">
               {/* Due date */}
               <FormField
                 control={form.control}
                 name="due_date"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date limite</FormLabel>
+                  <FormItem>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             className={cn(
-                              'w-full pl-3 text-left font-normal',
+                              'h-9 px-3 font-normal gap-2',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
+                            <CalendarIcon className="size-4" />
                             {field.value
-                              ? format(new Date(field.value), 'dd MMM yyyy', { locale: fr })
-                              : 'Choisir...'}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              ? format(new Date(field.value), 'dd MMM', { locale: fr })
+                              : 'Date'}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="end">
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
@@ -227,107 +215,171 @@ export function TaskModal({
                   </FormItem>
                 )}
               />
-
-              {/* Urgency toggles */}
-              <div className="flex items-center gap-4">
-                <FormField
-                  control={form.control}
-                  name="is_urgent"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <FormLabel className="!mt-0">Urgent</FormLabel>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="is_important"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2">
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <FormLabel className="!mt-0">Important</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
 
-            {/* Code task switch */}
-            <FormField
-              control={form.control}
-              name="is_code_task"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-2">
-                    <Code2 className="h-4 w-4 text-muted-foreground" />
-                    <FormLabel className="!mt-0 cursor-pointer">
-                      Tâche de code
-                    </FormLabel>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            {/* Urgency row: inline toggle buttons */}
+            <div className="flex items-center gap-2">
+              <FormField
+                control={form.control}
+                name="is_urgent"
+                render={({ field }) => (
+                  <Button
+                    type="button"
+                    variant={field.value ? 'default' : 'outline'}
+                    size="sm"
+                    className={cn(
+                      'h-8 text-xs',
+                      field.value && 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                    )}
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    Urgent
+                  </Button>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="is_important"
+                render={({ field }) => (
+                  <Button
+                    type="button"
+                    variant={field.value ? 'default' : 'outline'}
+                    size="sm"
+                    className={cn(
+                      'h-8 text-xs',
+                      field.value && 'bg-orange-600 hover:bg-orange-700 text-white dark:bg-orange-500 dark:hover:bg-orange-600'
+                    )}
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    Important
+                  </Button>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="is_code_task"
+                render={({ field }) => (
+                  <Button
+                    type="button"
+                    variant={field.value ? 'default' : 'outline'}
+                    size="sm"
+                    className={cn(
+                      'h-8 text-xs gap-1',
+                      field.value && 'bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600'
+                    )}
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    <Code2 className="size-3.5" />
+                    Code
+                  </Button>
+                )}
+              />
+            </div>
 
-            {/* Time estimation presets */}
-            <FormField
-              control={form.control}
-              name="estimated_minutes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estimation</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {TIME_ESTIMATION_PRESETS.map((preset) => (
-                      <Button
-                        key={preset.value}
-                        type="button"
-                        variant={field.value === preset.value ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() =>
-                          field.onChange(
-                            field.value === preset.value ? undefined : preset.value
-                          )
-                        }
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Expandable section for less common fields */}
+            <Collapsible open={showMore} onOpenChange={setShowMore}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full h-8 text-xs text-muted-foreground gap-1"
+                >
+                  <ChevronDown className={cn(
+                    'size-3.5 transition-transform',
+                    showMore && 'rotate-180'
+                  )} />
+                  {showMore ? 'Moins d\'options' : 'Plus d\'options'}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-2">
+                {/* Description */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Description</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Description courte..."
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Tags */}
-            <FormField
-              control={form.control}
-              name="tag_ids"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <FormControl>
-                    <TagSelect
-                      value={field.value ?? []}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Time estimation presets */}
+                <FormField
+                  control={form.control}
+                  name="estimated_minutes"
+                  render={({ field }) => {
+                    const [expanded, setExpanded] = useState(!field.value)
+                    return (
+                      <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Estimation</FormLabel>
+                        {!expanded && field.value ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 w-fit px-3 text-xs"
+                            onClick={() => setExpanded(true)}
+                          >
+                            {TIME_ESTIMATION_PRESETS.find((p) => p.value === field.value)?.label ?? `${field.value} min`}
+                          </Button>
+                        ) : (
+                          <div className="flex flex-wrap gap-1.5">
+                            {TIME_ESTIMATION_PRESETS.map((preset) => (
+                              <Button
+                                key={preset.value}
+                                type="button"
+                                variant={field.value === preset.value ? 'default' : 'outline'}
+                                size="sm"
+                                className="h-7 px-2.5 text-xs"
+                                onClick={() => {
+                                  field.onChange(
+                                    field.value === preset.value ? undefined : preset.value
+                                  )
+                                  setExpanded(false)
+                                }}
+                              >
+                                {preset.label}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
+
+                {/* Tags */}
+                <FormField
+                  control={form.control}
+                  name="tag_ids"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Tags</FormLabel>
+                      <FormControl>
+                        <TagSelect
+                          value={field.value ?? []}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4">
+            <div className="flex gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"

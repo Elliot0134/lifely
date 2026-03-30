@@ -7,7 +7,6 @@ import {
   CalendarIcon,
   ChevronDown,
   ChevronRight,
-  Clock,
   Code,
   Terminal,
   Trash2,
@@ -27,7 +26,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -124,12 +122,21 @@ export function TaskDetailSheet({
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const [estimationExpanded, setEstimationExpanded] = useState(false)
 
-  // ─── Local state for debounced fields ──────────────────
+  // ─── Local state for all editable fields ───────────────
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [body, setBody] = useState("")
   const [aiInstructions, setAiInstructions] = useState("")
+  const [localIsUrgent, setLocalIsUrgent] = useState(false)
+  const [localIsImportant, setLocalIsImportant] = useState(false)
+  const [localIsCodeTask, setLocalIsCodeTask] = useState(false)
+  const [localStatus, setLocalStatus] = useState<TaskStatus>("todo")
+  const [localEstimatedMinutes, setLocalEstimatedMinutes] = useState<number | null>(null)
+  const [localProjectId, setLocalProjectId] = useState<string | null>(null)
+  const [localDueDate, setLocalDueDate] = useState<string | null>(null)
+  const [localTagIds, setLocalTagIds] = useState<string[]>([])
 
   // Sync local state when task changes
   useEffect(() => {
@@ -138,6 +145,14 @@ export function TaskDetailSheet({
       setDescription(task.description ?? "")
       setBody(task.body ?? "")
       setAiInstructions(task.ai_instructions ?? "")
+      setLocalIsUrgent(task.is_urgent)
+      setLocalIsImportant(task.is_important)
+      setLocalIsCodeTask(task.is_code_task)
+      setLocalStatus(task.status)
+      setLocalEstimatedMinutes(task.estimated_minutes ?? null)
+      setLocalProjectId(task.project_id ?? null)
+      setLocalDueDate(task.due_date ?? null)
+      setLocalTagIds(task.tags?.map((t) => t.id) ?? [])
       setSubtasksExpanded(false)
     }
   }, [task?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -178,33 +193,52 @@ export function TaskDetailSheet({
     !!task && aiInstructions !== (task.ai_instructions ?? "")
   )
 
-  // ─── Handlers ──────────────────────────────────────────
+  // ─── Handlers (optimistic local state + server save) ────
 
   const handleStatusChange = (status: TaskStatus) => {
+    setLocalStatus(status)
     saveField("status", status)
   }
 
   const handleProjectChange = (projectId: string) => {
-    saveField("project_id", projectId === "none" ? null : projectId)
+    const value = projectId === "none" ? null : projectId
+    setLocalProjectId(value)
+    saveField("project_id", value)
   }
 
   const handleDueDateChange = (date: Date | undefined) => {
-    saveField(
-      "due_date",
-      date ? format(date, "yyyy-MM-dd") : null
-    )
+    const value = date ? format(date, "yyyy-MM-dd") : null
+    setLocalDueDate(value)
+    saveField("due_date", value)
   }
 
   const handleEstimationChange = (minutes: number) => {
-    saveField(
-      "estimated_minutes",
-      task?.estimated_minutes === minutes ? null : minutes
-    )
+    const value = localEstimatedMinutes === minutes ? null : minutes
+    setLocalEstimatedMinutes(value)
+    saveField("estimated_minutes", value)
   }
 
   const handleTagsChange = (tagIds: string[]) => {
     if (!task) return
+    setLocalTagIds(tagIds)
     updateTask.mutate({ id: task.id, tag_ids: tagIds })
+  }
+
+  const toggleUrgent = () => {
+    const value = !localIsUrgent
+    setLocalIsUrgent(value)
+    saveField("is_urgent", value)
+  }
+
+  const toggleImportant = () => {
+    const value = !localIsImportant
+    setLocalIsImportant(value)
+    saveField("is_important", value)
+  }
+
+  const toggleCodeTask = (checked: boolean) => {
+    setLocalIsCodeTask(checked)
+    saveField("is_code_task", checked)
   }
 
   const handleDelete = () => {
@@ -232,11 +266,11 @@ export function TaskDetailSheet({
         showCloseButton
       >
         {/* ─── Header ─────────────────────────────────────── */}
-        <SheetHeader className="p-4 pb-0 pr-10">
+        <SheetHeader className="px-4 pt-4 pb-0 pr-10">
           <div className="flex items-start gap-3">
             <div className="pt-0.5">
               <TaskStatusCheckbox
-                status={task.status}
+                status={localStatus}
                 onChange={handleStatusChange}
                 size="lg"
               />
@@ -255,27 +289,82 @@ export function TaskDetailSheet({
                   "border-none bg-transparent px-0 text-lg font-semibold shadow-none",
                   "focus-visible:ring-0 focus-visible:ring-offset-0",
                   "placeholder:text-muted-foreground/50",
-                  task.status === "completed" &&
+                  localStatus === "completed" &&
                     "line-through text-muted-foreground"
                 )}
                 placeholder="Titre de la tache..."
               />
             </div>
           </div>
+
+          {/* Quick toggles under title */}
+          <div className="flex items-center gap-1.5 pl-9 pt-1">
+            <Button
+              variant={localIsUrgent ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "h-6 px-2 text-[11px]",
+                localIsUrgent &&
+                  "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              )}
+              onClick={toggleUrgent}
+            >
+              Urgent
+            </Button>
+            <Button
+              variant={localIsImportant ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "h-6 px-2 text-[11px]",
+                localIsImportant &&
+                  "bg-orange-600 hover:bg-orange-700 text-white dark:bg-orange-500 dark:hover:bg-orange-600"
+              )}
+              onClick={toggleImportant}
+            >
+              Important
+            </Button>
+            <Button
+              variant={localIsCodeTask ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "h-6 px-2 text-[11px] gap-1",
+                localIsCodeTask &&
+                  "bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+              )}
+              onClick={() => toggleCodeTask(!localIsCodeTask)}
+            >
+              <Code className="size-3" />
+              Code
+            </Button>
+            {task.due_status && task.due_status !== "no_date" && (
+              <Badge
+                variant="outline"
+                className="h-6 text-[11px] font-normal"
+                style={{
+                  borderColor: dueStatusColor
+                    ? `${dueStatusColor}50`
+                    : undefined,
+                  color: dueStatusColor,
+                }}
+              >
+                {getDueStatusLabel(task.due_status as TaskDueStatus)}
+              </Badge>
+            )}
+          </div>
         </SheetHeader>
 
         <Separator className="my-3" />
 
-        {/* ─── Properties Grid ────────────────────────────── */}
-        <div className="px-4 space-y-1">
-          <div className="grid grid-cols-[120px_1fr] gap-y-3 gap-x-4 items-center text-sm">
+        {/* ─── Properties ─────────────────────────────────── */}
+        <div className="px-4 space-y-2">
+          <div className="grid grid-cols-[100px_1fr] gap-y-2 gap-x-3 items-center text-sm">
             {/* Statut */}
-            <span className="text-muted-foreground">Statut</span>
+            <span className="text-xs text-muted-foreground">Statut</span>
             <Select
-              value={task.status}
+              value={localStatus}
               onValueChange={(v) => handleStatusChange(v as TaskStatus)}
             >
-              <SelectTrigger className="h-8 w-full">
+              <SelectTrigger className="h-7 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -294,17 +383,17 @@ export function TaskDetailSheet({
             </Select>
 
             {/* Projet */}
-            <span className="text-muted-foreground">Projet</span>
+            <span className="text-xs text-muted-foreground">Projet</span>
             <Select
-              value={task.project_id ?? "none"}
+              value={localProjectId ?? "none"}
               onValueChange={handleProjectChange}
             >
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue placeholder="Aucun projet" />
+              <SelectTrigger className="h-7 text-xs">
+                <SelectValue placeholder="Aucun" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">
-                  <span className="text-muted-foreground">Aucun projet</span>
+                  <span className="text-muted-foreground">Aucun</span>
                 </SelectItem>
                 {projects.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
@@ -322,110 +411,37 @@ export function TaskDetailSheet({
               </SelectContent>
             </Select>
 
-            {/* Entreprise (read-only) */}
-            <span className="text-muted-foreground">Entreprise</span>
-            <span className="text-sm">
-              {task.company_name ?? "Personnel"}
-            </span>
-
-            {/* Sous-taches */}
-            <span className="text-muted-foreground">Sous-taches</span>
-            <div>
-              <button
-                type="button"
-                onClick={() => setSubtasksExpanded(!subtasksExpanded)}
-                className="flex items-center gap-1.5 text-sm hover:text-foreground transition-colors"
-              >
-                {subtasksExpanded ? (
-                  <ChevronDown className="size-3.5" />
-                ) : (
-                  <ChevronRight className="size-3.5" />
-                )}
-                <Badge variant="secondary" className="text-xs font-normal">
-                  {task.subtask_completed_count ?? 0}/{task.subtask_count ?? 0}
-                </Badge>
-              </button>
-            </div>
-
-            {/* Statut delai */}
-            {task.due_status && (
-              <>
-                <span className="text-muted-foreground">Delai</span>
-                <Badge
-                  variant="outline"
-                  className="w-fit text-xs"
-                  style={{
-                    borderColor: dueStatusColor
-                      ? `${dueStatusColor}50`
-                      : undefined,
-                    color: dueStatusColor,
-                  }}
-                >
-                  {getDueStatusLabel(task.due_status as TaskDueStatus)}
-                </Badge>
-              </>
-            )}
-
-            {/* Urgence toggles */}
-            <span className="text-muted-foreground">Urgence</span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={task.is_urgent ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "h-7 text-xs gap-1",
-                  task.is_urgent &&
-                    "bg-red-500 hover:bg-red-600 text-white"
-                )}
-                onClick={() => saveField("is_urgent", !task.is_urgent)}
-              >
-                <span aria-hidden>&#128293;</span> Urgent
-              </Button>
-              <Button
-                variant={task.is_important ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "h-7 text-xs gap-1",
-                  task.is_important &&
-                    "bg-amber-500 hover:bg-amber-600 text-white"
-                )}
-                onClick={() => saveField("is_important", !task.is_important)}
-              >
-                <span aria-hidden>&#128680;</span> Important
-              </Button>
-            </div>
-
             {/* Echeance */}
-            <span className="text-muted-foreground">Echeance</span>
+            <span className="text-xs text-muted-foreground">Echeance</span>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
                   className={cn(
-                    "h-8 w-full justify-start gap-2 text-left font-normal",
-                    !task.due_date && "text-muted-foreground"
+                    "h-7 w-full justify-start gap-2 text-left text-xs font-normal",
+                    !localDueDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="size-3.5" />
-                  {task.due_date
-                    ? format(new Date(task.due_date), "d MMM yyyy", {
+                  <CalendarIcon className="size-3" />
+                  {localDueDate
+                    ? format(new Date(localDueDate), "d MMM yyyy", {
                         locale: fr,
                       })
-                    : "Pas de date"}
+                    : "Aucune"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={
-                    task.due_date ? new Date(task.due_date) : undefined
+                    localDueDate ? new Date(localDueDate) : undefined
                   }
                   onSelect={handleDueDateChange}
                   locale={fr}
                   initialFocus
                 />
-                {task.due_date && (
+                {localDueDate && (
                   <div className="border-t p-2">
                     <Button
                       variant="ghost"
@@ -441,121 +457,137 @@ export function TaskDetailSheet({
             </Popover>
 
             {/* Estimation */}
-            <span className="text-muted-foreground">Estimation</span>
-            <div className="flex flex-wrap gap-1">
-              {TIME_ESTIMATION_PRESETS.map((preset) => (
-                <Button
-                  key={preset.value}
-                  variant={
-                    task.estimated_minutes === preset.value
-                      ? "default"
-                      : "outline"
-                  }
-                  size="sm"
-                  className="h-6 px-2 text-xs"
-                  onClick={() => handleEstimationChange(preset.value)}
-                >
-                  {preset.label}
-                </Button>
-              ))}
-            </div>
+            <span className="text-xs text-muted-foreground">Estimation</span>
+            {!estimationExpanded && localEstimatedMinutes ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 w-fit px-3 text-xs"
+                onClick={() => setEstimationExpanded(true)}
+              >
+                {TIME_ESTIMATION_PRESETS.find((p) => p.value === localEstimatedMinutes)?.label ?? `${localEstimatedMinutes} min`}
+              </Button>
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {TIME_ESTIMATION_PRESETS.map((preset) => (
+                  <Button
+                    key={preset.value}
+                    variant={
+                      localEstimatedMinutes === preset.value
+                        ? "default"
+                        : "outline"
+                    }
+                    size="sm"
+                    className="h-6 px-2 text-[11px]"
+                    onClick={() => {
+                      handleEstimationChange(preset.value)
+                      setEstimationExpanded(false)
+                    }}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+            )}
 
             {/* Tags */}
-            <span className="text-muted-foreground">Tags</span>
+            <span className="text-xs text-muted-foreground">Tags</span>
             <TagSelect
-              value={task.tags?.map((t) => t.id) ?? []}
+              value={localTagIds}
               onChange={handleTagsChange}
             />
-
-            {/* Code task */}
-            <span className="text-muted-foreground">Tache code</span>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={task.is_code_task}
-                onCheckedChange={(checked) =>
-                  saveField("is_code_task", checked)
-                }
-              />
-              {task.is_code_task && (
-                <Code className="size-3.5 text-blue-500" />
-              )}
-            </div>
           </div>
+        </div>
 
-          {/* Subtask list (expandable) */}
+        {/* ─── Sous-taches (inline) ───────────────────────── */}
+        <div className="px-4 pt-3">
+          <button
+            type="button"
+            onClick={() => setSubtasksExpanded(!subtasksExpanded)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {subtasksExpanded ? (
+              <ChevronDown className="size-3" />
+            ) : (
+              <ChevronRight className="size-3" />
+            )}
+            Sous-taches
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+              {task.subtask_completed_count ?? 0}/{task.subtask_count ?? 0}
+            </Badge>
+          </button>
           {subtasksExpanded && (
             <div className="pt-2">
-              <SubtaskList parentTaskId={task.id} />
+              <SubtaskList parentTaskId={task.id} className="pl-0" />
             </div>
           )}
         </div>
 
+        <Separator className="my-3" />
+
+        {/* ─── Description ────────────────────────────────── */}
+        <div className="px-4 space-y-1.5">
+          <span className="text-xs text-muted-foreground">Description</span>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Ajouter une description..."
+            rows={2}
+            className="text-sm resize-none border-none bg-muted/50 shadow-none focus-visible:ring-1"
+          />
+        </div>
+
+        {/* ─── Notes ──────────────────────────────────────── */}
+        <div className="px-4 pt-2 space-y-1.5">
+          <span className="text-xs text-muted-foreground">Notes</span>
+          <Textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Prendre des notes..."
+            rows={4}
+            className="text-sm resize-none border-none bg-muted/50 shadow-none focus-visible:ring-1"
+          />
+        </div>
+
         {/* ─── Claude Code Section ────────────────────────── */}
-        {task.is_code_task && (
-          <>
-            <Separator className="my-3" />
-            <div className="px-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <Terminal className="size-4 text-blue-500" />
-                <span className="text-sm font-medium">
-                  Instructions pour Claude Code
-                </span>
-              </div>
-              <Textarea
-                value={aiInstructions}
-                onChange={(e) => setAiInstructions(e.target.value)}
-                placeholder="Decrivez le contexte, les fichiers concernes, les contraintes..."
-                rows={4}
-                className="text-sm resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                Ce contexte sera transmis a Claude Code via MCP
-              </p>
+        {localIsCodeTask && (
+          <div className="px-4 pt-2 space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <Terminal className="size-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Instructions Claude Code
+              </span>
             </div>
-          </>
+            <Textarea
+              value={aiInstructions}
+              onChange={(e) => setAiInstructions(e.target.value)}
+              placeholder="Contexte, fichiers, contraintes..."
+              rows={3}
+              className="text-sm resize-none border-none bg-muted/50 shadow-none focus-visible:ring-1"
+            />
+          </div>
         )}
 
         <Separator className="my-3" />
 
-        {/* ─── Description ────────────────────────────────── */}
-        <div className="px-4 space-y-2">
-          <span className="text-sm font-medium">Description</span>
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ajoutez une description..."
-            rows={3}
-            className="text-sm resize-none"
-          />
-        </div>
-
-        {/* ─── Body / Notes ───────────────────────────────── */}
-        <div className="px-4 pt-3 space-y-2">
-          <span className="text-sm font-medium">Notes</span>
-          <Textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="Prenez des notes..."
-            rows={6}
-            className="text-sm resize-none"
-          />
-        </div>
-
-        <Separator className="my-3" />
-
-        {/* ─── Delete ─────────────────────────────────────── */}
-        <div className="px-4 pb-6">
+        {/* ─── Footer ─────────────────────────────────────── */}
+        <div className="px-4 pb-4 flex items-center justify-between">
+          {task.company_name && (
+            <span className="text-[11px] text-muted-foreground">
+              {task.company_name}
+            </span>
+          )}
           <AlertDialog
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
           >
             <AlertDialogTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-auto"
               >
-                <Trash2 className="size-3.5" />
+                <Trash2 className="size-3" />
                 Supprimer
               </Button>
             </AlertDialogTrigger>

@@ -50,6 +50,7 @@ import type { TaskFilters } from '@/types/tasks'
 
 export type ViewMode = 'kanban' | 'table'
 export type GroupBy = 'project' | 'status' | 'due_status' | 'urgency' | 'company' | 'none'
+export type SubGroupBy = 'status' | 'urgency' | 'none'
 export type SortBy = 'due_date' | 'title' | 'urgency' | 'created_at'
 
 interface TaskToolbarProps {
@@ -57,6 +58,8 @@ interface TaskToolbarProps {
   setViewMode: (mode: ViewMode) => void
   groupBy: GroupBy
   setGroupBy: (group: GroupBy) => void
+  subGroupBy: SubGroupBy
+  setSubGroupBy: (sub: SubGroupBy) => void
   sortBy: SortBy
   setSortBy: (sort: SortBy) => void
   sortOrder: 'asc' | 'desc'
@@ -78,6 +81,12 @@ const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
   { value: 'urgency', label: 'Urgence' },
   { value: 'company', label: 'Entreprise' },
   { value: 'none', label: 'Aucun' },
+]
+
+const SUB_GROUP_OPTIONS: { value: SubGroupBy; label: string }[] = [
+  { value: 'none', label: 'Aucun' },
+  { value: 'status', label: 'Statut' },
+  { value: 'urgency', label: 'Urgence' },
 ]
 
 const SORT_OPTIONS: { value: SortBy; label: string }[] = [
@@ -235,6 +244,8 @@ export function TaskToolbar({
   setViewMode,
   groupBy,
   setGroupBy,
+  subGroupBy,
+  setSubGroupBy,
   sortBy,
   setSortBy,
   sortOrder,
@@ -319,9 +330,9 @@ export function TaskToolbar({
   const hasActiveFilters = activeFilters.length > 0
 
   return (
-    <div className="space-y-3">
-      {/* ─── Top bar ─────────────────────────────────── */}
-      <div className="flex items-center gap-2">
+    <div className="space-y-3 min-w-0">
+      {/* ─── Row 1: View + Sort/Group + Search + Actions ── */}
+      <div className="flex items-center gap-2 flex-wrap">
         {/* View toggle */}
         <div className="flex items-center rounded-md border bg-muted/50 p-0.5">
           <Tooltip>
@@ -381,6 +392,33 @@ export function TaskToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Sous-grouper par (only when groupBy is not none/status) */}
+        {viewMode === 'kanban' && groupBy !== 'none' && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="hidden sm:flex h-9 gap-1.5 text-xs">
+                {subGroupBy === 'none'
+                  ? 'Sous-groupe'
+                  : `Sous: ${SUB_GROUP_OPTIONS.find((o) => o.value === subGroupBy)?.label}`}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuRadioGroup
+                value={subGroupBy}
+                onValueChange={(v) => setSubGroupBy(v as SubGroupBy)}
+              >
+                {SUB_GROUP_OPTIONS
+                  .filter((opt) => opt.value !== groupBy)
+                  .map((opt) => (
+                    <DropdownMenuRadioItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         {/* Trier par */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -424,8 +462,8 @@ export function TaskToolbar({
           </TooltipContent>
         </Tooltip>
 
-        {/* Search */}
-        <div className="relative flex-1 min-w-0 max-w-xs">
+        {/* Search — push to the right */}
+        <div className="relative flex-1 min-w-0 max-w-xs ml-auto">
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Rechercher..."
@@ -437,15 +475,6 @@ export function TaskToolbar({
               })
             }
             className="h-9 pl-9 text-sm"
-          />
-        </div>
-
-        {/* Desktop filters (hidden on mobile) */}
-        <div className="hidden lg:flex items-center gap-2">
-          <FilterControls
-            filters={filters}
-            setFilters={setFilters}
-            projects={projects}
           />
         </div>
 
@@ -521,12 +550,42 @@ export function TaskToolbar({
                 setFilters={setFilters}
                 projects={projects}
               />
+
+              {/* Show completed (mobile) */}
+              <div className="sm:hidden flex items-center justify-between">
+                <Label htmlFor="show-completed-mobile" className="text-xs text-muted-foreground cursor-pointer">
+                  Afficher terminées
+                </Label>
+                <Switch
+                  id="show-completed-mobile"
+                  checked={showCompleted}
+                  onCheckedChange={setShowCompleted}
+                />
+              </div>
             </div>
           </PopoverContent>
         </Popover>
 
+        {/* New task button */}
+        <Button size="sm" className="h-9 gap-1.5 shrink-0" onClick={onCreateTask}>
+          <Plus className="size-4" />
+          <span className="hidden sm:inline">Nouveau</span>
+        </Button>
+      </div>
+
+      {/* ─── Row 2: Desktop filters ────────────────────── */}
+      <div className="hidden lg:flex items-center gap-2 flex-wrap">
+        <FilterControls
+          filters={filters}
+          setFilters={setFilters}
+          projects={projects}
+        />
+
+        {/* Separator */}
+        <div className="h-5 w-px bg-border mx-1" />
+
         {/* Show completed toggle */}
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="show-completed"
             checked={showCompleted}
@@ -536,12 +595,18 @@ export function TaskToolbar({
             Terminées
           </Label>
         </div>
+      </div>
 
-        {/* New task button */}
-        <Button size="sm" className="h-9 gap-1.5 shrink-0" onClick={onCreateTask}>
-          <Plus className="size-4" />
-          <span className="hidden sm:inline">Nouveau</span>
-        </Button>
+      {/* Show completed toggle — tablet only (sm to lg) */}
+      <div className="hidden sm:flex lg:hidden items-center gap-2">
+        <Switch
+          id="show-completed-tablet"
+          checked={showCompleted}
+          onCheckedChange={setShowCompleted}
+        />
+        <Label htmlFor="show-completed-tablet" className="text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+          Terminées
+        </Label>
       </div>
 
       {/* ─── Active filter pills ─────────────────────── */}

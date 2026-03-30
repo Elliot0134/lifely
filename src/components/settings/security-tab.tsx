@@ -100,7 +100,7 @@ export function SecurityTab() {
   return (
     <div className="grid gap-6 max-w-2xl">
       {/* Change Password Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Changer le mot de passe</CardTitle>
           <CardDescription>
@@ -230,7 +230,7 @@ export function SecurityTab() {
       </Card>
 
       {/* 2FA Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634] opacity-60">
+      <Card className="bg-card opacity-60">
         <CardHeader>
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-muted-foreground" />

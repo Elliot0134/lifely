@@ -22,11 +22,11 @@ import { CategoryModal } from './category-modal'
 import type { TransactionType } from '@/types'
 
 const TYPE_COLORS: Record<TransactionType, string> = {
-  revenue: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  variable_expense: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  fixed_expense: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  credit: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  savings: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+  revenue: 'bg-[#8b9a6b]/15 text-[#8b9a6b]',
+  variable_expense: 'bg-[#f26a4b]/15 text-[#f26a4b]',
+  fixed_expense: 'bg-[#8e8a83]/15 text-[#8e8a83]',
+  credit: 'bg-[#c45c5c]/15 text-[#c45c5c]',
+  savings: 'bg-[#a89f8f]/15 text-[#a89f8f]',
 }
 
 interface CategoryWithCount {
@@ -53,7 +53,7 @@ export function CategoryGrid() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <div className="text-center text-muted-foreground">
             <p>Erreur lors du chargement des categories</p>
@@ -76,7 +76,7 @@ export function CategoryGrid() {
         {Array.from({ length: 8 }).map((_, i) => (
           <Card
             key={i}
-            className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]"
+            className="bg-card"
           >
             <CardContent className="p-4">
               <div className="flex flex-col items-center gap-3">
@@ -96,7 +96,7 @@ export function CategoryGrid() {
 
   if (categories.length === 0) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="py-12">
           <div className="text-center text-muted-foreground">
             <p className="text-lg font-medium mb-1">Aucune categorie</p>
@@ -147,7 +147,7 @@ export function CategoryGrid() {
           return (
             <Card
               key={category.id}
-              className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634] group relative overflow-hidden"
+              className="bg-card group relative overflow-hidden"
             >
               <CardContent className="p-4">
                 <div className="flex flex-col items-center gap-2 text-center">

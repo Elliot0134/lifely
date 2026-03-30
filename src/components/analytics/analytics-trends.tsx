@@ -67,7 +67,7 @@ function fmt(d: Date): string {
 
 function TrendSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardContent className="pt-6">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-lg" />
@@ -83,7 +83,7 @@ function TrendSkeleton() {
 
 function EmptyTrendCard({ icon: Icon, label, color }: { icon: typeof TrendingUp; label: string; color: string }) {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardContent className="pt-6">
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
@@ -242,10 +242,10 @@ export function AnalyticsTrends({ period }: AnalyticsTrendsProps) {
       <div className="grid gap-4 md:grid-cols-3">
         {/* Category increasing the most */}
         {data?.increasingCategory ? (
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+          <Card className="bg-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f26a4b]/15 text-[#f26a4b]">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -258,15 +258,15 @@ export function AnalyticsTrends({ period }: AnalyticsTrendsProps) {
             </CardContent>
           </Card>
         ) : (
-          <EmptyTrendCard icon={TrendingUp} label="Categorie en hausse" color="bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400" />
+          <EmptyTrendCard icon={TrendingUp} label="Categorie en hausse" color="bg-[#f26a4b]/15 text-[#f26a4b]" />
         )}
 
         {/* Category decreasing the most */}
         {data?.decreasingCategory ? (
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+          <Card className="bg-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#8b9a6b]/15 text-[#8b9a6b]">
                   <TrendingDown className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -279,15 +279,15 @@ export function AnalyticsTrends({ period }: AnalyticsTrendsProps) {
             </CardContent>
           </Card>
         ) : (
-          <EmptyTrendCard icon={TrendingDown} label="Categorie en baisse" color="bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400" />
+          <EmptyTrendCard icon={TrendingDown} label="Categorie en baisse" color="bg-[#8b9a6b]/15 text-[#8b9a6b]" />
         )}
 
         {/* Busiest day of week */}
         {data?.busiestDay ? (
-          <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+          <Card className="bg-card">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -300,7 +300,7 @@ export function AnalyticsTrends({ period }: AnalyticsTrendsProps) {
             </CardContent>
           </Card>
         ) : (
-          <EmptyTrendCard icon={Calendar} label="Jour le plus depensier" color="bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400" />
+          <EmptyTrendCard icon={Calendar} label="Jour le plus depensier" color="bg-muted text-muted-foreground" />
         )}
       </div>
     </div>

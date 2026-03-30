@@ -6,10 +6,8 @@ import { ClipboardList, RefreshCw } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -17,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 import { useTasksView } from '@/hooks/use-tasks-view'
-import { useTasks, useUpdateTaskStatus } from '@/lib/queries/tasks'
+import { useTasks, useUpdateTask, useUpdateTaskStatus } from '@/lib/queries/tasks'
 import { TaskToolbar } from '@/components/tasks/task-toolbar'
 import { TaskBoard, TaskBoardSkeleton } from '@/components/tasks/task-board'
 import { TaskTable, TaskTableSkeleton } from '@/components/tasks/task-table'
@@ -32,6 +30,8 @@ export default function TasksPage() {
     setViewMode,
     groupBy,
     setGroupBy,
+    subGroupBy,
+    setSubGroupBy,
     sortBy,
     setSortBy,
     sortOrder,
@@ -55,9 +55,10 @@ export default function TasksPage() {
   // ─── Process tasks: filter → sort → group ─────────────
   const filteredTasks = useMemo(() => {
     if (!tasks) return []
-    if (showCompleted) return tasks
+    // When grouped by status, always include completed tasks so the column isn't empty
+    if (showCompleted || groupBy === 'status') return tasks
     return tasks.filter((t) => t.status !== 'completed')
-  }, [tasks, showCompleted])
+  }, [tasks, showCompleted, groupBy])
 
   const sortedTasks = useMemo(
     () => sortTasks(filteredTasks),
@@ -72,10 +73,42 @@ export default function TasksPage() {
   // ─── UI state ─────────────────────────────────────────
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [createDefaultProjectId, setCreateDefaultProjectId] = useState<string | undefined>()
+
   // ─── Handlers ─────────────────────────────────────────
+  const handleCreateTask = (defaultProjectId?: string) => {
+    setCreateDefaultProjectId(defaultProjectId)
+    setCreateModalOpen(true)
+  }
+
   const updateStatus = useUpdateTaskStatus()
+  const updateTask = useUpdateTask()
   const handleStatusChange = (taskId: string, status: TaskStatus) => {
     updateStatus.mutate({ id: taskId, status })
+  }
+
+  // Drag & drop between columns
+  const handleMoveTask = (taskId: string, targetColumnKey: string) => {
+    switch (groupBy) {
+      case 'status':
+        updateStatus.mutate({ id: taskId, status: targetColumnKey as TaskStatus })
+        break
+      case 'project':
+        updateTask.mutate({
+          id: taskId,
+          project_id: targetColumnKey === 'no_project' ? null : targetColumnKey,
+        })
+        break
+      case 'urgency':
+        updateTask.mutate({
+          id: taskId,
+          is_urgent: targetColumnKey === 'urgent_important' || targetColumnKey === 'urgent',
+          is_important: targetColumnKey === 'urgent_important' || targetColumnKey === 'important',
+        })
+        break
+      default:
+        break
+    }
   }
 
   // ─── Derived state ────────────────────────────────────
@@ -102,10 +135,6 @@ export default function TasksPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
                 <BreadcrumbPage>Taches</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -114,13 +143,15 @@ export default function TasksPage() {
       </header>
 
       {/* ─── Content ─────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 overflow-hidden">
         {/* Toolbar */}
         <TaskToolbar
           viewMode={viewMode}
           setViewMode={setViewMode}
           groupBy={groupBy}
           setGroupBy={setGroupBy}
+          subGroupBy={subGroupBy}
+          setSubGroupBy={setSubGroupBy}
           sortBy={sortBy}
           setSortBy={setSortBy}
           sortOrder={sortOrder}
@@ -130,7 +161,7 @@ export default function TasksPage() {
           clearFilters={clearFilters}
           showCompleted={showCompleted}
           setShowCompleted={setShowCompleted}
-          onCreateTask={() => setCreateModalOpen(true)}
+          onCreateTask={() => handleCreateTask()}
         />
 
         {/* Loading */}
@@ -177,7 +208,7 @@ export default function TasksPage() {
                 </div>
                 <Button
                   size="sm"
-                  onClick={() => setCreateModalOpen(true)}
+                  onClick={() => handleCreateTask()}
                 >
                   Nouvelle tache
                 </Button>
@@ -209,6 +240,8 @@ export default function TasksPage() {
               groupBy={groupBy}
               onSelectTask={setSelectedTask}
               onStatusChange={handleStatusChange}
+              onMoveTask={handleMoveTask}
+              onCreateTask={handleCreateTask}
               showCompleted={showCompleted}
             />
           ) : (
@@ -239,6 +272,7 @@ export default function TasksPage() {
       <TaskModal
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
+        defaultProjectId={createDefaultProjectId}
       />
 
     </>

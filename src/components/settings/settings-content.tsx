@@ -47,7 +47,7 @@ export function SettingsContent() {
   )
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-6 md:p-8">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Parametres</h1>
         <p className="text-muted-foreground">

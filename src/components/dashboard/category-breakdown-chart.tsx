@@ -22,19 +22,19 @@ interface CategoryData {
 
 // Fallback palette when category has no color
 const FALLBACK_COLORS = [
-  'hsl(24 95% 53%)',   // orange
-  'hsl(217 91% 60%)',  // blue
-  'hsl(0 84% 60%)',    // red
-  'hsl(187 85% 53%)',  // cyan
-  'hsl(262 83% 58%)',  // purple
-  'hsl(38 92% 50%)',   // amber
-  'hsl(330 81% 60%)',  // pink
-  'hsl(142 76% 36%)',  // green
+  '#f26a4b',   // orange
+  '#8e8a83',  // blue
+  '#c45c5c',    // red
+  '#a89f8f',  // cyan
+  '#5c5a56',  // purple
+  '#d4a76a',   // amber
+  '#7a6b5d',  // pink
+  '#8b9a6b',  // green
 ]
 
 function ChartSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <Skeleton className="h-5 w-52" />
       </CardHeader>
@@ -159,7 +159,7 @@ export function CategoryBreakdownChart() {
           chartData.push({
             name: 'Autres',
             value: Math.abs(restTotal),
-            color: 'hsl(var(--muted-foreground))',
+            color: 'var(--muted-foreground)',
           })
         }
 
@@ -179,7 +179,7 @@ export function CategoryBreakdownChart() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">{error}</p>
         </CardContent>
@@ -188,7 +188,7 @@ export function CategoryBreakdownChart() {
   }
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <CardTitle className="text-base">Répartition des dépenses</CardTitle>
       </CardHeader>

@@ -227,17 +227,17 @@ function TaskRow({
         {task.is_urgent && (
           <Badge
             variant="outline"
-            className="px-1 py-0 text-[10px] border-orange-500/30 text-orange-500"
+            className="px-1 py-0 text-[10px] border-destructive/30 text-destructive"
           >
-            🔥
+            Urgent
           </Badge>
         )}
         {task.is_important && (
           <Badge
             variant="outline"
-            className="px-1 py-0 text-[10px] border-red-500/30 text-red-500"
+            className="px-1 py-0 text-[10px] border-orange-600/30 text-orange-700 dark:text-orange-400"
           >
-            🚨
+            Imp.
           </Badge>
         )}
       </div>

@@ -27,7 +27,7 @@ function KPISkeleton() {
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card key={i} className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-5 w-5 rounded-full" />
@@ -57,8 +57,8 @@ function TrendBadge({ value }: { value: number | null }) {
   const colorClass = isZero
     ? 'text-muted-foreground'
     : isPositive
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-red-600 dark:text-red-400'
+      ? 'text-[#8b9a6b]'
+      : 'text-[#c45c5c]'
 
   return (
     <span className={`text-xs ${colorClass}`}>
@@ -178,7 +178,7 @@ export function KPICards() {
   if (error) {
     return (
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-full bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card className="col-span-full bg-card">
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">{error}</p>
           </CardContent>
@@ -195,8 +195,8 @@ export function KPICards() {
       value: data.totalBalance,
       trend: data.balanceTrend,
       icon: Wallet,
-      iconColor: 'text-violet-500',
-      valueColor: data.totalBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+      iconColor: 'text-muted-foreground',
+      valueColor: data.totalBalance >= 0 ? 'text-[#8b9a6b]' : 'text-[#c45c5c]',
       formatType: data.totalBalance >= 0 ? 'revenue' as const : 'variable_expense' as const,
     },
     {
@@ -204,8 +204,8 @@ export function KPICards() {
       value: data.monthlyRevenue,
       trend: data.revenueTrend,
       icon: TrendingUp,
-      iconColor: 'text-[hsl(var(--color-revenue))]',
-      valueColor: 'text-[hsl(var(--color-revenue))]',
+      iconColor: 'text-[var(--color-revenue)]',
+      valueColor: 'text-[var(--color-revenue)]',
       formatType: 'revenue' as const,
     },
     {
@@ -213,8 +213,8 @@ export function KPICards() {
       value: data.monthlyExpenses,
       trend: data.expensesTrend,
       icon: TrendingDown,
-      iconColor: 'text-[hsl(var(--color-variable-expense))]',
-      valueColor: 'text-[hsl(var(--color-variable-expense))]',
+      iconColor: 'text-[var(--color-variable-expense)]',
+      valueColor: 'text-[var(--color-variable-expense)]',
       formatType: 'variable_expense' as const,
     },
     {
@@ -222,8 +222,8 @@ export function KPICards() {
       value: data.monthlySavings,
       trend: data.savingsTrend,
       icon: PiggyBank,
-      iconColor: 'text-[hsl(var(--color-savings))]',
-      valueColor: 'text-[hsl(var(--color-savings))]',
+      iconColor: 'text-[var(--color-savings)]',
+      valueColor: 'text-[var(--color-savings)]',
       formatType: 'revenue' as const,
     },
   ]
@@ -235,7 +235,7 @@ export function KPICards() {
         return (
           <Card
             key={card.title}
-            className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]"
+            className="bg-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">

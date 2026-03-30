@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { Database } from '@/types/database.types'
 
@@ -18,7 +18,7 @@ type CategoryRow = Database['public']['Tables']['categories']['Row']
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createRouteHandlerClient()
+    const supabase = await createClient()
 
     // Vérifier l'authentification
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createRouteHandlerClient()
+    const supabase = await createClient()
 
     // Vérifier l'authentification
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
         error: 'Données invalides',
-        details: error.errors
+        details: error.issues
       }, { status: 400 })
     }
 

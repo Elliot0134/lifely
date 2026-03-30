@@ -29,7 +29,7 @@ const MONTH_LABELS = [
 
 function ChartSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <Skeleton className="h-5 w-48" />
       </CardHeader>
@@ -151,7 +151,7 @@ export function RevenueExpenseChart() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">{error}</p>
         </CardContent>
@@ -162,7 +162,7 @@ export function RevenueExpenseChart() {
   const hasData = data.some((d) => d.revenue > 0 || d.expenses > 0)
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <CardTitle className="text-base">Revenus vs Dépenses</CardTitle>
       </CardHeader>
@@ -172,25 +172,25 @@ export function RevenueExpenseChart() {
             <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(142 76% 36%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(142 76% 36%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#8b9a6b" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#8b9a6b" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(24 95% 53%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(24 95% 53%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#f26a4b" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#f26a4b" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis
                 dataKey="label"
                 fontSize={12}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 fontSize={12}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fill: 'var(--muted-foreground)' }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) =>
@@ -206,7 +206,7 @@ export function RevenueExpenseChart() {
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="hsl(142 76% 36%)"
+                stroke="#8b9a6b"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
@@ -214,7 +214,7 @@ export function RevenueExpenseChart() {
               <Area
                 type="monotone"
                 dataKey="expenses"
-                stroke="hsl(24 95% 53%)"
+                stroke="#f26a4b"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorExpenses)"

@@ -35,7 +35,6 @@ export const updateTaskSchema = z.object({
   description: z.string().max(5000).nullable().optional(),
   project_id: z.string().uuid().nullable().optional(),
   parent_task_id: z.string().uuid().nullable().optional(),
-  is_completed: z.boolean().optional(),
   is_code_task: z.boolean().optional(),
   due_date: z.string().nullable().optional(),
   due_datetime: z.string().nullable().optional(),

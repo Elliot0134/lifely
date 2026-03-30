@@ -84,7 +84,7 @@ export function TransactionList() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <div className="text-center text-muted-foreground">
             <p>Erreur lors du chargement des transactions</p>
@@ -103,7 +103,7 @@ export function TransactionList() {
       <TransactionFilters filters={filters} onChange={handleFiltersChange} />
 
       {/* Transaction list */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">
             Toutes les transactions

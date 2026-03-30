@@ -50,8 +50,8 @@ export function TaskTimeBlock({
         "hover:ring-2 hover:ring-ring/20 hover:shadow-sm",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         isCode
-          ? "border-blue-500/30 bg-blue-500/10 text-blue-950 dark:text-blue-100"
-          : "border-slate-500/30 bg-slate-500/10 text-slate-950 dark:text-slate-100",
+          ? "border-primary/30 bg-primary/10"
+          : "border-border bg-muted/50",
         task.status === "completed" && "opacity-50",
         className
       )}
@@ -86,7 +86,7 @@ export function TaskTimeBlock({
             {isCode && (
               <Badge
                 variant="outline"
-                className="gap-0.5 border-blue-500/40 bg-blue-500/15 text-blue-700 dark:text-blue-300 text-[10px] px-1 py-0"
+                className="gap-0.5 text-[10px] px-1 py-0"
               >
                 <Code className="size-2.5" />
                 Code
@@ -97,7 +97,7 @@ export function TaskTimeBlock({
             {task.is_urgent && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1 py-0 border-red-500/50 bg-red-500/15 text-red-600 dark:text-red-400"
+                className="text-[10px] px-1 py-0 border-destructive/30 bg-destructive/10 text-destructive"
               >
                 Urgent
               </Badge>
@@ -105,7 +105,7 @@ export function TaskTimeBlock({
             {task.is_important && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1 py-0 border-amber-500/50 bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                className="text-[10px] px-1 py-0 border-orange-600/30 bg-orange-600/10 text-orange-700 dark:text-orange-400"
               >
                 Important
               </Badge>

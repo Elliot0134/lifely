@@ -67,7 +67,7 @@ export function PreferencesTab() {
   return (
     <div className="grid gap-6 max-w-2xl">
       {/* Theme Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Apparence</CardTitle>
           <CardDescription>
@@ -106,7 +106,7 @@ export function PreferencesTab() {
       </Card>
 
       {/* Currency Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Devise</CardTitle>
           <CardDescription>
@@ -122,7 +122,7 @@ export function PreferencesTab() {
       </Card>
 
       {/* Notifications Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>

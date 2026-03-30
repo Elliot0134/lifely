@@ -39,7 +39,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar user={userData} />
-      <SidebarInset className="flex-1 pb-20 md:pb-0">
+      <SidebarInset className="flex-1 min-w-0 pb-20 md:pb-0">
         {children}
       </SidebarInset>
       <MobileBottomNav />

@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 function ChartSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader>
         <Skeleton className="h-5 w-48" />
       </CardHeader>

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-// Use same pattern as other routes - createRouteHandlerClient is used across API routes
-// even though the export name is createClient in server.ts
-import { createClient as createRouteHandlerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const updateCategorySchema = z.object({
@@ -20,7 +18,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const supabase = await createRouteHandlerClient()
+    const supabase = await createClient()
 
     const {
       data: { user },
@@ -73,7 +71,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const supabase = await createRouteHandlerClient()
+    const supabase = await createClient()
 
     const {
       data: { user },

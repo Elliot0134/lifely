@@ -2,13 +2,12 @@
 
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Calendar, Code, ListTree } from "lucide-react"
+import { AlertTriangle, Calendar, Code, Flame, ListTree } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { TASK_DUE_STATUS_COLORS } from "@/lib/constants"
 import type { Task, TaskDueStatus, TaskStatus } from "@/types/tasks"
 
-import { Badge } from "@/components/ui/badge"
 import { TagBadge } from "@/components/tags/tag-badge"
 import { TaskStatusCheckbox } from "@/components/tasks/task-status-checkbox"
 
@@ -112,33 +111,15 @@ export function TaskBoardCard({
           </span>
         )}
 
-        {/* Urgency badges */}
+        {/* Icon-only badges */}
         {task.is_urgent && (
-          <Badge
-            variant="outline"
-            className="border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] px-1.5 py-0"
-          >
-            Urgent
-          </Badge>
+          <Flame className="size-3.5 text-destructive shrink-0" />
         )}
         {task.is_important && (
-          <Badge
-            variant="outline"
-            className="border-orange-500/30 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] px-1.5 py-0"
-          >
-            Important
-          </Badge>
+          <AlertTriangle className="size-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
         )}
-
-        {/* Code badge */}
         {task.is_code_task && (
-          <Badge
-            variant="outline"
-            className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] px-1.5 py-0"
-          >
-            <Code className="size-3" />
-            Code
-          </Badge>
+          <Code className="size-3.5 text-muted-foreground shrink-0" />
         )}
 
         {/* Due date */}

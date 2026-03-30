@@ -24,7 +24,7 @@ interface RecentTransaction {
 
 function RecentTransactionsSkeleton() {
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-4 w-20" />
@@ -83,7 +83,7 @@ export function RecentTransactions() {
 
   if (error) {
     return (
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">{error}</p>
         </CardContent>
@@ -92,7 +92,7 @@ export function RecentTransactions() {
   }
 
   return (
-    <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+    <Card className="bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-base font-semibold">Transactions recentes</CardTitle>
         <Link

@@ -184,7 +184,7 @@ export function ProfileTab() {
   if (loading) {
     return (
       <div className="grid gap-6 max-w-2xl">
-        <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card className="bg-card">
           <CardContent className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </CardContent>
@@ -196,7 +196,7 @@ export function ProfileTab() {
   if (!profile) {
     return (
       <div className="grid gap-6 max-w-2xl">
-        <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+        <Card className="bg-card">
           <CardContent className="py-8">
             <p className="text-muted-foreground text-sm text-center">
               Impossible de charger le profil.
@@ -214,7 +214,7 @@ export function ProfileTab() {
   return (
     <div className="grid gap-6 max-w-2xl">
       {/* Avatar Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Photo de profil</CardTitle>
         </CardHeader>
@@ -264,7 +264,7 @@ export function ProfileTab() {
       </Card>
 
       {/* Profile Info Section */}
-      <Card className="bg-[#f7f8fa] border-0 shadow-none dark:bg-[#363634]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Informations</CardTitle>
         </CardHeader>
