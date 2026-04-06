@@ -3,8 +3,8 @@
 import { useMemo } from 'react'
 import {
   ArrowDownAZ,
-  ArrowUpDown,
   ArrowUpAZ,
+  ArrowUpDown,
   Filter,
   LayoutGrid,
   List,
@@ -42,61 +42,59 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useProjects } from '@/lib/queries/task-projects'
-import { TASK_STATUSES } from '@/lib/constants'
-import type { TaskFilters } from '@/types/tasks'
+import { useCompanies } from '@/lib/queries/companies'
+import { PROJECT_STATUSES } from '@/lib/constants'
+import type { ProjectFilters } from '@/types/tasks'
+import type {
+  ProjectViewMode,
+  ProjectGroupBy,
+  ProjectSubGroupBy,
+  ProjectSortBy,
+} from '@/hooks/use-projects-view'
 
-// ─── Types ──────────────────────────────────────────────
+// ─── Props ─────────────────────────────────────────────
 
-export type ViewMode = 'kanban' | 'table'
-export type GroupBy = 'project' | 'status' | 'due_status' | 'urgency' | 'company' | 'none'
-export type SubGroupBy = 'status' | 'urgency' | 'none'
-export type SortBy = 'due_date' | 'title' | 'urgency' | 'created_at'
-
-interface TaskToolbarProps {
-  viewMode: ViewMode
-  setViewMode: (mode: ViewMode) => void
-  groupBy: GroupBy
-  setGroupBy: (group: GroupBy) => void
-  subGroupBy: SubGroupBy
-  setSubGroupBy: (sub: SubGroupBy) => void
-  sortBy: SortBy
-  setSortBy: (sort: SortBy) => void
+interface ProjectToolbarProps {
+  viewMode: ProjectViewMode
+  setViewMode: (mode: ProjectViewMode) => void
+  groupBy: ProjectGroupBy
+  setGroupBy: (group: ProjectGroupBy) => void
+  subGroupBy: ProjectSubGroupBy
+  setSubGroupBy: (sub: ProjectSubGroupBy) => void
+  sortBy: ProjectSortBy
+  setSortBy: (sort: ProjectSortBy) => void
   sortOrder: 'asc' | 'desc'
   toggleSortOrder: () => void
-  filters: TaskFilters
-  setFilters: (filters: TaskFilters) => void
+  filters: ProjectFilters
+  setFilters: (filters: ProjectFilters) => void
   clearFilters: () => void
   showCompleted: boolean
   setShowCompleted: (show: boolean) => void
-  onCreateTask: () => void
+  onCreateProject: () => void
 }
 
-// ─── Constants ──────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────
 
-const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
-  { value: 'project', label: 'Projet' },
+const GROUP_OPTIONS: { value: ProjectGroupBy; label: string }[] = [
   { value: 'status', label: 'Statut' },
-  { value: 'due_status', label: 'Statut délai' },
-  { value: 'urgency', label: 'Urgence' },
   { value: 'company', label: 'Entreprise' },
   { value: 'none', label: 'Aucun' },
 ]
 
-const SUB_GROUP_OPTIONS: { value: SubGroupBy; label: string }[] = [
+const SUB_GROUP_OPTIONS: { value: ProjectSubGroupBy; label: string }[] = [
   { value: 'none', label: 'Aucun' },
   { value: 'status', label: 'Statut' },
-  { value: 'urgency', label: 'Urgence' },
+  { value: 'company', label: 'Entreprise' },
 ]
 
-const SORT_OPTIONS: { value: SortBy; label: string }[] = [
-  { value: 'due_date', label: 'Échéance' },
-  { value: 'title', label: 'Titre (A-Z)' },
-  { value: 'urgency', label: 'Urgence' },
+const SORT_OPTIONS: { value: ProjectSortBy; label: string }[] = [
+  { value: 'name', label: 'Nom (A-Z)' },
+  { value: 'end_date', label: 'Date de fin' },
+  { value: 'progress', label: 'Progression' },
   { value: 'created_at', label: 'Création' },
 ]
 
-// ─── Filter pill ────────────────────────────────────────
+// ─── Filter pill ───────────────────────────────────────
 
 function FilterPill({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
@@ -114,102 +112,44 @@ function FilterPill({ label, onRemove }: { label: string; onRemove: () => void }
   )
 }
 
-// ─── Filter controls (shared between desktop & mobile) ──
+// ─── Filter controls ───────────────────────────────────
 
 function FilterControls({
   filters,
   setFilters,
-  projects,
-  fullWidth = false,
+  companies,
 }: {
-  filters: TaskFilters
-  setFilters: (f: TaskFilters) => void
-  projects: { id: string; name: string; color?: string | null }[]
-  fullWidth?: boolean
+  filters: ProjectFilters
+  setFilters: (f: ProjectFilters) => void
+  companies: { id: string; name: string; color?: string | null }[]
 }) {
   return (
     <>
-      {/* Project */}
+      {/* Company */}
       <Select
-        value={filters.project_id ?? '_all'}
+        value={filters.company_id ?? '_all'}
         onValueChange={(v) =>
-          setFilters({ ...filters, project_id: v === '_all' ? undefined : v })
+          setFilters({ ...filters, company_id: v === '_all' ? undefined : v })
         }
       >
-        <SelectTrigger className={fullWidth ? 'w-full' : 'w-44'}>
-          <SelectValue placeholder="Projet" />
+        <SelectTrigger className="w-full sm:w-44">
+          <SelectValue placeholder="Entreprise" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="_all">Tous les projets</SelectItem>
-          {projects.map((p) => (
-            <SelectItem key={p.id} value={p.id}>
+          <SelectItem value="_all">Toutes les entreprises</SelectItem>
+          {companies.map((c) => (
+            <SelectItem key={c.id} value={c.id}>
               <div className="flex items-center gap-2">
-                {p.color && (
+                {c.color && (
                   <div
                     className="size-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: p.color }}
+                    style={{ backgroundColor: c.color }}
                   />
                 )}
-                {p.name}
+                {c.name}
               </div>
             </SelectItem>
           ))}
-        </SelectContent>
-      </Select>
-
-      {/* Urgency toggles */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant={filters.is_urgent ? 'default' : 'outline'}
-          size="sm"
-          className="h-9 text-xs"
-          onClick={() =>
-            setFilters({
-              ...filters,
-              is_urgent: filters.is_urgent ? undefined : true,
-            })
-          }
-        >
-          Urgent
-        </Button>
-        <Button
-          variant={filters.is_important ? 'default' : 'outline'}
-          size="sm"
-          className="h-9 text-xs"
-          onClick={() =>
-            setFilters({
-              ...filters,
-              is_important: filters.is_important ? undefined : true,
-            })
-          }
-        >
-          Important
-        </Button>
-      </div>
-
-      {/* Type */}
-      <Select
-        value={
-          filters.is_code_task === undefined
-            ? '_all'
-            : filters.is_code_task
-              ? 'code'
-              : 'non_code'
-        }
-        onValueChange={(v) =>
-          setFilters({
-            ...filters,
-            is_code_task: v === '_all' ? undefined : v === 'code',
-          })
-        }
-      >
-        <SelectTrigger className={fullWidth ? 'w-full' : 'w-32'}>
-          <SelectValue placeholder="Type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="_all">Tous types</SelectItem>
-          <SelectItem value="code">Code</SelectItem>
-          <SelectItem value="non_code">Non-code</SelectItem>
         </SelectContent>
       </Select>
 
@@ -219,18 +159,24 @@ function FilterControls({
         onValueChange={(v) =>
           setFilters({
             ...filters,
-            status: v === '_all' ? undefined : (v as TaskFilters['status']),
+            status: v === '_all' ? undefined : (v as ProjectFilters['status']),
           })
         }
       >
-        <SelectTrigger className={fullWidth ? 'w-full' : 'w-36'}>
+        <SelectTrigger className="w-full sm:w-40">
           <SelectValue placeholder="Statut" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="_all">Tous statuts</SelectItem>
-          {TASK_STATUSES.map((s) => (
+          {PROJECT_STATUSES.map((s) => (
             <SelectItem key={s.value} value={s.value}>
-              {s.label}
+              <div className="flex items-center gap-2">
+                <span
+                  className="size-2 rounded-full shrink-0"
+                  style={{ backgroundColor: s.color }}
+                />
+                {s.label}
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
@@ -239,9 +185,9 @@ function FilterControls({
   )
 }
 
-// ─── Main component ─────────────────────────────────────
+// ─── Main component ────────────────────────────────────
 
-export function TaskToolbar({
+export function ProjectToolbar({
   viewMode,
   setViewMode,
   groupBy,
@@ -257,60 +203,31 @@ export function TaskToolbar({
   clearFilters,
   showCompleted,
   setShowCompleted,
-  onCreateTask,
-}: TaskToolbarProps) {
-  const { data: projects = [] } = useProjects()
+  onCreateProject,
+}: ProjectToolbarProps) {
+  const { data: companies = [] } = useCompanies()
 
-  // Count active filters for mobile badge
   const activeFilterCount = useMemo(() => {
     let count = 0
-    if (filters.project_id) count++
-    if (filters.is_urgent) count++
-    if (filters.is_important) count++
-    if (filters.is_code_task !== undefined) count++
+    if (filters.company_id) count++
     if (filters.status) count++
     return count
   }, [filters])
 
-  // Active filter pills
   const activeFilters = useMemo(() => {
     const pills: { key: string; label: string; onRemove: () => void }[] = []
 
-    if (filters.project_id) {
-      const project = projects.find((p) => p.id === filters.project_id)
+    if (filters.company_id) {
+      const company = companies.find((c) => c.id === filters.company_id)
       pills.push({
-        key: 'project',
-        label: `Projet: ${project?.name ?? 'Inconnu'}`,
-        onRemove: () => setFilters({ ...filters, project_id: undefined }),
-      })
-    }
-
-    if (filters.is_urgent) {
-      pills.push({
-        key: 'urgent',
-        label: 'Urgent',
-        onRemove: () => setFilters({ ...filters, is_urgent: undefined }),
-      })
-    }
-
-    if (filters.is_important) {
-      pills.push({
-        key: 'important',
-        label: 'Important',
-        onRemove: () => setFilters({ ...filters, is_important: undefined }),
-      })
-    }
-
-    if (filters.is_code_task !== undefined) {
-      pills.push({
-        key: 'type',
-        label: `Type: ${filters.is_code_task ? 'Code' : 'Non-code'}`,
-        onRemove: () => setFilters({ ...filters, is_code_task: undefined }),
+        key: 'company',
+        label: `Entreprise: ${company?.name ?? 'Inconnue'}`,
+        onRemove: () => setFilters({ ...filters, company_id: undefined }),
       })
     }
 
     if (filters.status) {
-      const status = TASK_STATUSES.find((s) => s.value === filters.status)
+      const status = PROJECT_STATUSES.find((s) => s.value === filters.status)
       pills.push({
         key: 'status',
         label: `Statut: ${status?.label ?? filters.status}`,
@@ -327,7 +244,7 @@ export function TaskToolbar({
     }
 
     return pills
-  }, [filters, projects, setFilters])
+  }, [filters, companies, setFilters])
 
   const hasActiveFilters = activeFilters.length > 0
 
@@ -383,7 +300,7 @@ export function TaskToolbar({
           <DropdownMenuContent align="start">
             <DropdownMenuRadioGroup
               value={groupBy}
-              onValueChange={(v) => setGroupBy(v as GroupBy)}
+              onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}
             >
               {GROUP_OPTIONS.map((opt) => (
                 <DropdownMenuRadioItem key={opt.value} value={opt.value}>
@@ -394,7 +311,7 @@ export function TaskToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Sous-grouper par (only when groupBy is not none/status) */}
+        {/* Sous-grouper par (only when groupBy is not none) */}
         {viewMode === 'kanban' && groupBy !== 'none' && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -407,7 +324,7 @@ export function TaskToolbar({
             <DropdownMenuContent align="start">
               <DropdownMenuRadioGroup
                 value={subGroupBy}
-                onValueChange={(v) => setSubGroupBy(v as SubGroupBy)}
+                onValueChange={(v) => setSubGroupBy(v as ProjectSubGroupBy)}
               >
                 {SUB_GROUP_OPTIONS
                   .filter((opt) => opt.value !== groupBy)
@@ -431,7 +348,7 @@ export function TaskToolbar({
           <DropdownMenuContent align="start">
             <DropdownMenuRadioGroup
               value={sortBy}
-              onValueChange={(v) => setSortBy(v as SortBy)}
+              onValueChange={(v) => setSortBy(v as ProjectSortBy)}
             >
               {SORT_OPTIONS.map((opt) => (
                 <DropdownMenuRadioItem key={opt.value} value={opt.value}>
@@ -464,11 +381,11 @@ export function TaskToolbar({
           </TooltipContent>
         </Tooltip>
 
-        {/* Search — push to the right */}
+        {/* Search */}
         <div className="relative flex-1 min-w-0 max-w-xs ml-auto">
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Rechercher..."
+            placeholder="Rechercher un projet..."
             value={filters.search ?? ''}
             onChange={(e) =>
               setFilters({
@@ -480,7 +397,7 @@ export function TaskToolbar({
           />
         </div>
 
-        {/* Mobile filters popover (visible only on small screens) */}
+        {/* Mobile filters popover */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="lg:hidden h-9 gap-1.5">
@@ -505,7 +422,7 @@ export function TaskToolbar({
                 <Label className="text-xs text-muted-foreground">Grouper par</Label>
                 <Select
                   value={groupBy}
-                  onValueChange={(v) => setGroupBy(v as GroupBy)}
+                  onValueChange={(v) => setGroupBy(v as ProjectGroupBy)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -523,7 +440,7 @@ export function TaskToolbar({
                 <div className="flex items-center gap-2">
                   <Select
                     value={sortBy}
-                    onValueChange={(v) => setSortBy(v as SortBy)}
+                    onValueChange={(v) => setSortBy(v as ProjectSortBy)}
                   >
                     <SelectTrigger className="flex-1">
                       <SelectValue />
@@ -550,17 +467,16 @@ export function TaskToolbar({
               <FilterControls
                 filters={filters}
                 setFilters={setFilters}
-                projects={projects}
-                fullWidth
+                companies={companies}
               />
 
               {/* Show completed (mobile) */}
               <div className="sm:hidden flex items-center justify-between">
-                <Label htmlFor="show-completed-mobile" className="text-xs text-muted-foreground cursor-pointer">
-                  Afficher terminées
+                <Label htmlFor="show-completed-projects-mobile" className="text-xs text-muted-foreground cursor-pointer">
+                  Afficher terminés
                 </Label>
                 <Switch
-                  id="show-completed-mobile"
+                  id="show-completed-projects-mobile"
                   checked={showCompleted}
                   onCheckedChange={setShowCompleted}
                 />
@@ -569,8 +485,8 @@ export function TaskToolbar({
           </PopoverContent>
         </Popover>
 
-        {/* New task button */}
-        <Button size="sm" className="h-9 gap-1.5 shrink-0" onClick={onCreateTask}>
+        {/* New project button */}
+        <Button size="sm" className="h-9 gap-1.5 shrink-0" onClick={onCreateProject}>
           <Plus className="size-4" />
           <span className="hidden sm:inline">Nouveau</span>
         </Button>
@@ -581,7 +497,7 @@ export function TaskToolbar({
         <FilterControls
           filters={filters}
           setFilters={setFilters}
-          projects={projects}
+          companies={companies}
         />
 
         {/* Separator */}
@@ -590,25 +506,25 @@ export function TaskToolbar({
         {/* Show completed toggle */}
         <div className="flex items-center gap-2">
           <Switch
-            id="show-completed"
+            id="show-completed-projects"
             checked={showCompleted}
             onCheckedChange={setShowCompleted}
           />
-          <Label htmlFor="show-completed" className="text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
-            Terminées
+          <Label htmlFor="show-completed-projects" className="text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+            Terminés
           </Label>
         </div>
       </div>
 
-      {/* Show completed toggle — tablet only (sm to lg) */}
+      {/* Show completed toggle — tablet only */}
       <div className="hidden sm:flex lg:hidden items-center gap-2">
         <Switch
-          id="show-completed-tablet"
+          id="show-completed-projects-tablet"
           checked={showCompleted}
           onCheckedChange={setShowCompleted}
         />
-        <Label htmlFor="show-completed-tablet" className="text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
-          Terminées
+        <Label htmlFor="show-completed-projects-tablet" className="text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+          Terminés
         </Label>
       </div>
 

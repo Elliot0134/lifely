@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { createPersonalCompany } from '@/lib/actions/companies'
-import type { Company, CreateCompanyInput, UpdateCompanyInput } from '@/types/tasks'
+import { companyGroupKeys } from '@/lib/queries/company-groups'
+import type { Company, CompanyLink, CreateCompanyInput, UpdateCompanyInput } from '@/types/tasks'
 
 // Query Keys Factory
 export const companyKeys = {
@@ -18,7 +19,7 @@ async function fetchCompanies(): Promise<Company[]> {
 
   const { data, error } = await supabase
     .from('companies')
-    .select('*')
+    .select('*, group:company_groups(*)')
     .order('is_personal', { ascending: false })
     .order('name', { ascending: true })
 
@@ -34,7 +35,7 @@ async function fetchCompany(id: string): Promise<Company> {
 
   const { data, error } = await supabase
     .from('companies')
-    .select('*')
+    .select('*, group:company_groups(*), links:company_links(*)')
     .eq('id', id)
     .single()
 
@@ -59,9 +60,11 @@ async function createCompany(input: CreateCompanyInput): Promise<Company> {
       name: input.name,
       color: input.color ?? null,
       icon: input.icon ?? null,
+      group_id: input.group_id ?? null,
+      ownership_type: input.ownership_type ?? 'owner',
       user_id: user.id,
     })
-    .select()
+    .select('*, group:company_groups(*)')
     .single()
 
   if (error) {
@@ -127,6 +130,7 @@ export function useCreateCompany() {
     mutationFn: createCompany,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: companyKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: companyGroupKeys.lists() })
       toast.success('Entreprise créée avec succès')
     },
     onError: (error: Error) => {
@@ -143,6 +147,7 @@ export function useUpdateCompany() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: companyKeys.lists() })
       queryClient.invalidateQueries({ queryKey: companyKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: companyGroupKeys.lists() })
       toast.success('Entreprise mise à jour avec succès')
     },
     onError: (error: Error) => {
@@ -158,11 +163,79 @@ export function useDeleteCompany() {
     mutationFn: deleteCompany,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: companyKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: companyGroupKeys.lists() })
       toast.success('Entreprise supprimée avec succès')
     },
     onError: (error: Error) => {
       toast.error(error.message)
     },
+  })
+}
+
+// ─── Company Links ──────────────────────────────────────
+
+async function fetchCompanyLinks(companyId: string): Promise<CompanyLink[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('company_links')
+    .select('*')
+    .eq('company_id', companyId)
+    .order('sort_order', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return data as CompanyLink[]
+}
+
+async function createCompanyLink(input: { company_id: string; label: string; url: string }): Promise<CompanyLink> {
+  const supabase = createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) throw new Error('Non autorisé')
+
+  const { data, error } = await supabase
+    .from('company_links')
+    .insert({ ...input, user_id: user.id })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data as CompanyLink
+}
+
+async function deleteCompanyLink(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('company_links').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export function useCompanyLinks(companyId: string | undefined) {
+  return useQuery({
+    queryKey: [...companyKeys.detail(companyId ?? ''), 'links'],
+    queryFn: () => fetchCompanyLinks(companyId!),
+    enabled: !!companyId,
+  })
+}
+
+export function useCreateCompanyLink() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createCompanyLink,
+    onSuccess: (_, { company_id }) => {
+      queryClient.invalidateQueries({ queryKey: companyKeys.detail(company_id) })
+      toast.success('Lien ajouté')
+    },
+    onError: (error: Error) => { toast.error(error.message) },
+  })
+}
+
+export function useDeleteCompanyLink(companyId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteCompanyLink,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: companyKeys.detail(companyId) })
+      toast.success('Lien supprimé')
+    },
+    onError: (error: Error) => { toast.error(error.message) },
   })
 }
 

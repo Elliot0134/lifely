@@ -115,6 +115,21 @@ src/
 - **JAMAIS** de modal qui touche les bords sur mobile
 - **Responsive géré par le composant Dialog de base** - pas besoin de classes additionnelles
 
+### Form Fields in Modals (CRITICAL)
+**Pas de labels au-dessus des champs. Le titre du champ va dans le placeholder.**
+```tsx
+// ✅ Correct — label dans le placeholder
+<Input placeholder="Nom de l'entreprise (ex: ESST Solutions...)" />
+
+// ❌ Interdit — label séparé au-dessus
+<FormLabel>Nom de l'entreprise</FormLabel>
+<Input placeholder="Ex: ESST Solutions..." />
+```
+- **JAMAIS** de `FormLabel` dans les modales — ça fait trop de texte
+- Le placeholder doit inclure le nom du champ + un exemple si pertinent
+- Pour les selects, utiliser `<SelectValue placeholder="Groupe..." />`
+- Objectif : UI épurée, moins de bruit visuel
+
 ### Styling System
 ```css
 /* Transaction type colors (defined in globals.css) */

@@ -17,7 +17,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import {
@@ -39,19 +38,22 @@ import {
   useCreateCompany,
   useUpdateCompany,
 } from '@/lib/queries/companies'
-import { COMPANY_STATUSES, PROJECT_COLORS } from '@/lib/constants'
-import type { Company, CompanyStatus } from '@/types/tasks'
+import { useCompanyGroups } from '@/lib/queries/company-groups'
+import { COMPANY_STATUSES, OWNERSHIP_TYPES, PROJECT_COLORS } from '@/lib/constants'
+import type { Company, CompanyStatus, OwnershipType } from '@/types/tasks'
 
 interface CompanyModalProps {
   trigger?: React.ReactNode
   company?: Company | null
+  defaultGroupId?: string
 }
 
-export function CompanyModal({ trigger, company }: CompanyModalProps) {
+export function CompanyModal({ trigger, company, defaultGroupId }: CompanyModalProps) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<CompanyStatus>(company?.status ?? 'not_started')
   const createMutation = useCreateCompany()
   const updateMutation = useUpdateCompany()
+  const { data: groups } = useCompanyGroups()
 
   const isEditMode = !!company
 
@@ -61,22 +63,26 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
       name: company?.name ?? '',
       color: company?.color ?? PROJECT_COLORS[0],
       icon: company?.icon ?? '',
+      group_id: company?.group_id ?? defaultGroupId ?? undefined,
+      ownership_type: company?.ownership_type ?? 'owner',
     },
   })
 
-  // Reset form when company changes or dialog opens
   useEffect(() => {
     if (open) {
       form.reset({
         name: company?.name ?? '',
         color: company?.color ?? PROJECT_COLORS[0],
         icon: company?.icon ?? '',
+        group_id: company?.group_id ?? defaultGroupId ?? undefined,
+        ownership_type: company?.ownership_type ?? 'owner',
       })
       setStatus(company?.status ?? 'not_started')
     }
-  }, [open, company, form])
+  }, [open, company, defaultGroupId, form])
 
   const selectedColor = form.watch('color')
+  const selectedOwnership = form.watch('ownership_type') ?? 'owner'
 
   const onSubmit = async (data: CreateCompanyInput) => {
     try {
@@ -86,14 +92,12 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
           name: data.name,
           color: data.color || null,
           icon: data.icon || null,
+          group_id: data.group_id || null,
+          ownership_type: data.ownership_type,
           status,
         })
       } else {
-        await createMutation.mutateAsync({
-          name: data.name,
-          color: data.color,
-          icon: data.icon,
-        })
+        await createMutation.mutateAsync(data)
       }
       setOpen(false)
     } catch {
@@ -128,10 +132,9 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l&apos;entreprise</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: ESST Solutions, Aurentia..."
+                      placeholder="Nom de l'entreprise (ex: ESST Solutions...)"
                       {...field}
                     />
                   </FormControl>
@@ -140,72 +143,136 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
               )}
             />
 
-            {/* Icon */}
+            {/* Group */}
             <FormField
               control={form.control}
-              name="icon"
+              name="group_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Icone (emoji ou texte)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: 🏢, 🚀, ES..."
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    value={field.value ?? '_none'}
+                    onValueChange={(v) => field.onChange(v === '_none' ? undefined : v)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Aucun groupe" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="_none">Aucun groupe</SelectItem>
+                      {groups?.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ backgroundColor: g.color || '#64748b' }}
+                            />
+                            {g.icon ? `${g.icon} ` : ''}{g.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Color */}
+            {/* Ownership Type */}
             <FormField
               control={form.control}
-              name="color"
+              name="ownership_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Couleur</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start font-normal"
-                        >
-                          <div
-                            className="mr-2 h-4 w-4 rounded border"
-                            style={{ backgroundColor: selectedColor }}
-                          />
-                          {selectedColor}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64">
-                      <div className="grid grid-cols-4 gap-2">
-                        {PROJECT_COLORS.map((color) => (
+                  <Select
+                    value={field.value ?? 'owner'}
+                    onValueChange={(v) => field.onChange(v as OwnershipType)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {OWNERSHIP_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          <div className="flex items-center gap-2">
+                            <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: t.color }} />
+                            {t.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Icon */}
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Icône (ex: 🏢, 🚀...)"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Color */}
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
                           <Button
-                            key={color}
-                            type="button"
                             variant="outline"
-                            size="sm"
-                            className="h-10 w-10 p-0"
-                            style={{ backgroundColor: color }}
-                            onClick={() => field.onChange(color)}
+                            className="w-full justify-start font-normal"
                           >
-                            {selectedColor === color && (
-                              <span className="text-white text-sm">
-                                ✓
-                              </span>
-                            )}
+                            <div
+                              className="mr-2 h-4 w-4 rounded border"
+                              style={{ backgroundColor: selectedColor }}
+                            />
+                            {selectedColor}
                           </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64">
+                        <div className="grid grid-cols-4 gap-2">
+                          {PROJECT_COLORS.map((color) => (
+                            <Button
+                              key={color}
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-10 w-10 p-0"
+                              style={{ backgroundColor: color }}
+                              onClick={() => field.onChange(color)}
+                            >
+                              {selectedColor === color && (
+                                <span className="text-white text-sm">✓</span>
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Status (edit mode only) */}
             {isEditMode && (
@@ -218,7 +285,7 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
                   onValueChange={(value: CompanyStatus) => setStatus(value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selectionner un statut" />
+                    <SelectValue placeholder="Sélectionner un statut" />
                   </SelectTrigger>
                   <SelectContent>
                     {COMPANY_STATUSES.map((s) => (
@@ -239,7 +306,7 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
 
             {/* Preview */}
             <div className="rounded-lg border p-3">
-              <p className="text-sm font-medium mb-2">Previsualisation</p>
+              <p className="text-sm font-medium mb-2">Prévisualisation</p>
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold"
@@ -254,17 +321,24 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
                   <p className="font-medium">
                     {form.watch('name') || 'Nom de l\'entreprise'}
                   </p>
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className="h-2 w-2 rounded-full"
-                      style={{
-                        backgroundColor:
-                          COMPANY_STATUSES.find((s) => s.value === status)?.color ??
-                          'hsl(0 0% 63%)',
-                      }}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {COMPANY_STATUSES.find((s) => s.value === status)?.label ?? 'Pas commence'}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            COMPANY_STATUSES.find((s) => s.value === status)?.color ??
+                            'hsl(0 0% 63%)',
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {COMPANY_STATUSES.find((s) => s.value === status)?.label ?? 'Pas commencé'}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <span className="size-1.5 rounded-full" style={{ backgroundColor: OWNERSHIP_TYPES.find((t) => t.value === selectedOwnership)?.color }} />
+                      {OWNERSHIP_TYPES.find((t) => t.value === selectedOwnership)?.label}
                     </span>
                   </div>
                 </div>
@@ -285,12 +359,12 @@ export function CompanyModal({ trigger, company }: CompanyModalProps) {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isEditMode ? 'Modification...' : 'Creation...'}
+                    {isEditMode ? 'Modification...' : 'Création...'}
                   </>
                 ) : isEditMode ? (
                   'Modifier'
                 ) : (
-                  'Creer'
+                  'Créer'
                 )}
               </Button>
             </div>

@@ -79,12 +79,35 @@ export const updateProjectSchema = z.object({
 export type CreateProjectInput = z.infer<typeof createProjectSchema>
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>
 
+// ── Company Group schemas ───────────────────────────────────────
+
+export const createCompanyGroupSchema = z.object({
+  name: z.string().min(1, "Le nom est obligatoire").max(200),
+  color: z.string().optional(),
+  icon: z.string().optional(),
+})
+
+export const updateCompanyGroupSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(200).optional(),
+  color: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  sort_order: z.number().int().optional(),
+})
+
+export type CreateCompanyGroupInput = z.infer<typeof createCompanyGroupSchema>
+export type UpdateCompanyGroupInput = z.infer<typeof updateCompanyGroupSchema>
+
 // ── Company schemas ─────────────────────────────────────────────
+
+const ownershipTypeEnum = z.enum(["owner", "shareholder", "client", "partner", "other"])
 
 export const createCompanySchema = z.object({
   name: z.string().min(1, "Le nom est obligatoire").max(200),
   color: z.string().optional(),
   icon: z.string().optional(),
+  group_id: z.string().uuid().optional(),
+  ownership_type: ownershipTypeEnum.optional(),
 })
 
 export const updateCompanySchema = z.object({
@@ -93,6 +116,28 @@ export const updateCompanySchema = z.object({
   status: z.enum(["not_started", "active", "completed"]).optional(),
   color: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
+  group_id: z.string().uuid().nullable().optional(),
+  ownership_type: ownershipTypeEnum.optional(),
+  // Legal
+  legal_form: z.string().max(100).nullable().optional(),
+  siren: z.string().max(20).nullable().optional(),
+  siret: z.string().max(20).nullable().optional(),
+  vat_number: z.string().max(30).nullable().optional(),
+  share_capital: z.number().nullable().optional(),
+  founded_at: z.string().nullable().optional(),
+  address: z.string().max(500).nullable().optional(),
+  // Participation
+  ownership_share: z.number().min(0).max(100).nullable().optional(),
+  role: z.string().max(100).nullable().optional(),
+  joined_at: z.string().nullable().optional(),
+  amount_invested: z.number().nullable().optional(),
+  // Contact
+  email: z.string().email().nullable().optional(),
+  phone: z.string().max(30).nullable().optional(),
+  website: z.string().max(500).nullable().optional(),
+  // Text
+  description: z.string().max(5000).nullable().optional(),
+  notes: z.string().max(10000).nullable().optional(),
 })
 
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>

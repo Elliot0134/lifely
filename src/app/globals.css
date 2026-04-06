@@ -186,6 +186,8 @@
   --color-neutral: #8e8a83;          /* Warm gray - stable */
 }
 
+/* Tiptap styles are in /src/styles/tiptap-editor.css (imported by NoteEditor component) */
+
 /* Animations et transitions */
 .animate-in {
   animation: fadeIn 0.3s ease-in-out;

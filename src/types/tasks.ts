@@ -3,6 +3,7 @@
 // ─── Enums ────────────────────────────────────────────
 
 export type CompanyStatus = 'not_started' | 'active' | 'completed'
+export type OwnershipType = 'owner' | 'shareholder' | 'client' | 'partner' | 'other'
 export type ProjectStatus = 'not_started' | 'in_progress' | 'completed'
 export type TaskStatus = 'todo' | 'in_progress' | 'completed'
 export type TaskDueStatus = 'no_date' | 'overdue' | 'today' | 'upcoming' | 'future'
@@ -10,6 +11,30 @@ export type CommentAuthorType = 'user' | 'claude'
 export type TaskRecurrenceFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 // ─── Entities ─────────────────────────────────────────
+
+export interface CompanyGroup {
+  id: string
+  user_id: string
+  name: string
+  color: string | null
+  icon: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+  // Computed
+  companies?: Company[]
+  company_count?: number
+}
+
+export interface CompanyLink {
+  id: string
+  company_id: string
+  user_id: string
+  label: string
+  url: string
+  sort_order: number
+  created_at: string
+}
 
 export interface Company {
   id: string
@@ -19,8 +44,34 @@ export interface Company {
   color: string | null
   icon: string | null
   is_personal: boolean
+  group_id: string | null
+  ownership_type: OwnershipType
+  // Legal
+  legal_form: string | null
+  siren: string | null
+  siret: string | null
+  vat_number: string | null
+  share_capital: number | null
+  founded_at: string | null
+  address: string | null
+  // Participation
+  ownership_share: number | null
+  role: string | null
+  joined_at: string | null
+  amount_invested: number | null
+  // Contact
+  email: string | null
+  phone: string | null
+  website: string | null
+  // Text
+  description: string | null
+  notes: string | null
+  // Timestamps
   created_at: string
   updated_at: string
+  // Joined
+  group?: CompanyGroup
+  links?: CompanyLink[]
   // Computed
   projects?: Project[]
   project_count?: number
@@ -191,10 +242,26 @@ export interface UpdateProjectInput {
   end_date?: string | null
 }
 
+export interface CreateCompanyGroupInput {
+  name: string
+  color?: string
+  icon?: string
+}
+
+export interface UpdateCompanyGroupInput {
+  id: string
+  name?: string
+  color?: string | null
+  icon?: string | null
+  sort_order?: number
+}
+
 export interface CreateCompanyInput {
   name: string
   color?: string
   icon?: string
+  group_id?: string
+  ownership_type?: OwnershipType
 }
 
 export interface UpdateCompanyInput {
@@ -203,6 +270,28 @@ export interface UpdateCompanyInput {
   status?: CompanyStatus
   color?: string | null
   icon?: string | null
+  group_id?: string | null
+  ownership_type?: OwnershipType
+  // Legal
+  legal_form?: string | null
+  siren?: string | null
+  siret?: string | null
+  vat_number?: string | null
+  share_capital?: number | null
+  founded_at?: string | null
+  address?: string | null
+  // Participation
+  ownership_share?: number | null
+  role?: string | null
+  joined_at?: string | null
+  amount_invested?: number | null
+  // Contact
+  email?: string | null
+  phone?: string | null
+  website?: string | null
+  // Text
+  description?: string | null
+  notes?: string | null
 }
 
 export interface CreateTagInput {
@@ -254,6 +343,19 @@ export interface UpdateRecurringTaskInput {
 
 // ─── Filters ──────────────────────────────────────────
 
+export interface CompanyFilters {
+  group_id?: string
+  ownership_type?: OwnershipType
+  status?: CompanyStatus
+  search?: string
+}
+
+export interface ProjectFilters {
+  company_id?: string
+  status?: ProjectStatus
+  search?: string
+}
+
 export interface TaskFilters {
   project_id?: string
   company_id?: string
@@ -294,6 +396,56 @@ export interface TimeBlock {
   start_time: string // "09:00"
   end_time: string   // "10:30"
   is_locked: boolean // true = manuellement planifie, false = suggestion auto
+}
+
+// ─── Notes ────────────────────────────────────────────
+
+export type NoteEntityType = 'task' | 'project' | 'company' | 'personal'
+
+export interface Note {
+  id: string
+  user_id: string
+  title: string
+  content: Record<string, unknown> | null
+  entity_type: NoteEntityType
+  entity_id: string | null
+  color: string | null
+  is_pinned: boolean
+  created_at: string
+  updated_at: string
+  // Joined
+  tags?: Tag[]
+  // Resolved entity name
+  entity_name?: string
+}
+
+export interface CreateNoteInput {
+  title: string
+  content?: Record<string, unknown>
+  entity_type?: NoteEntityType
+  entity_id?: string
+  color?: string
+  is_pinned?: boolean
+  tag_ids?: string[]
+}
+
+export interface UpdateNoteInput {
+  id: string
+  title?: string
+  content?: Record<string, unknown> | null
+  entity_type?: NoteEntityType
+  entity_id?: string | null
+  color?: string | null
+  is_pinned?: boolean
+  tag_ids?: string[]
+}
+
+export interface NoteFilters {
+  entity_type?: NoteEntityType
+  entity_id?: string
+  tag_ids?: string[]
+  is_pinned?: boolean
+  search?: string
 }
 
 // ─── Stats ────────────────────────────────────────────

@@ -85,6 +85,14 @@ export const COMPANY_STATUSES = [
   { value: 'completed', label: 'Terminée', color: 'hsl(217 91% 60%)' },
 ] as const
 
+export const OWNERSHIP_TYPES = [
+  { value: 'owner', label: 'Propriétaire', color: 'hsl(45 93% 47%)' },
+  { value: 'shareholder', label: 'Actionnaire', color: 'hsl(217 91% 60%)' },
+  { value: 'client', label: 'Client', color: 'hsl(142 76% 36%)' },
+  { value: 'partner', label: 'Partenaire', color: 'hsl(280 65% 60%)' },
+  { value: 'other', label: 'Autre', color: 'hsl(0 0% 63%)' },
+] as const
+
 export const PROJECT_STATUSES = [
   { value: 'not_started', label: 'Pas commencé', color: 'hsl(0 0% 63%)' },
   { value: 'in_progress', label: 'En cours', color: 'hsl(45 93% 47%)' },

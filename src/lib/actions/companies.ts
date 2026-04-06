@@ -31,6 +31,8 @@ export async function createCompany(input: CreateCompanyInput) {
         name: validated.name,
         color: validated.color ?? null,
         icon: validated.icon ?? null,
+        group_id: validated.group_id ?? null,
+        ownership_type: validated.ownership_type ?? 'owner',
         user_id: user.id,
       })
       .select()

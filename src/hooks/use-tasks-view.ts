@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Task, TaskFilters } from '@/types/tasks'
 import { TASK_STATUSES, EISENHOWER_QUADRANTS, TASK_DUE_STATUS_COLORS } from '@/lib/constants'
+import { useViewPreferences } from '@/hooks/use-view-preferences'
 
 // ─── Types ───────────────────────────────────────────
 
@@ -68,40 +69,79 @@ function buildSubGroups(tasks: Task[], by: SubGroupBy): Map<string, TaskSubGroup
   return subs
 }
 
-// ─── Hook ────────────────────────────────────────────
+// ─── Defaults ────────────────────────────────────────
 
-const STORAGE_KEY = 'lifely-tasks-view'
-
-function getStoredViewMode(): ViewMode {
-  if (typeof window === 'undefined') return 'kanban'
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'kanban' || stored === 'table') return stored
-  } catch { /* SSR or storage error */ }
-  return 'kanban'
+const DEFAULTS = {
+  viewMode: 'kanban' as ViewMode,
+  groupBy: 'project' as GroupBy,
+  subGroupBy: 'none' as SubGroupBy,
+  sortBy: 'created_at' as SortBy,
+  sortOrder: 'desc' as 'asc' | 'desc',
+  showCompleted: false,
 }
 
+// ─── Hook ────────────────────────────────────────────
+
 export function useTasksView() {
-  const [viewMode, setViewModeState] = useState<ViewMode>(getStoredViewMode)
-  const [groupBy, setGroupBy] = useState<GroupBy>('project')
-  const [subGroupBy, setSubGroupBy] = useState<SubGroupBy>('none')
-  const [sortBy, setSortBy] = useState<SortBy>('created_at')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-  const [filters, setFilters] = useState<TaskFilters>({})
-  const [showCompleted, setShowCompleted] = useState(false)
+  const { preferences, updatePreferences } = useViewPreferences({
+    pageKey: 'tasks',
+    defaults: DEFAULTS,
+  })
 
-  const setViewMode = useCallback((mode: ViewMode) => {
-    setViewModeState(mode)
-    try { localStorage.setItem(STORAGE_KEY, mode) } catch { /* noop */ }
-  }, [])
+  // Typed getters
+  const viewMode = (preferences.viewMode ?? DEFAULTS.viewMode) as ViewMode
+  const groupBy = (preferences.groupBy ?? DEFAULTS.groupBy) as GroupBy
+  const subGroupBy = (preferences.subGroupBy ?? DEFAULTS.subGroupBy) as SubGroupBy
+  const sortBy = (preferences.sortBy ?? DEFAULTS.sortBy) as SortBy
+  const sortOrder = (preferences.sortOrder ?? DEFAULTS.sortOrder) as 'asc' | 'desc'
+  const showCompleted = (preferences.showCompleted ?? DEFAULTS.showCompleted) as boolean
 
+  // Filters are ephemeral — not persisted to DB
+  const { preferences: filterPrefs, updatePreferences: updateFilterPrefs } = useViewPreferences({
+    pageKey: '_tasks_filters',
+    defaults: {},
+  })
+  const filters: TaskFilters = useMemo(() => {
+    const f: TaskFilters = {}
+    if (filterPrefs.project_id) f.project_id = filterPrefs.project_id as string
+    if (filterPrefs.company_id) f.company_id = filterPrefs.company_id as string
+    if (filterPrefs.status) f.status = filterPrefs.status as TaskFilters['status']
+    if (filterPrefs.is_code_task !== undefined) f.is_code_task = filterPrefs.is_code_task as boolean
+    if (filterPrefs.is_urgent) f.is_urgent = filterPrefs.is_urgent as boolean
+    if (filterPrefs.is_important) f.is_important = filterPrefs.is_important as boolean
+    if (filterPrefs.search) f.search = filterPrefs.search as string
+    return f
+  }, [filterPrefs])
+
+  // Setters
+  const setViewMode = useCallback((v: ViewMode) => updatePreferences({ viewMode: v }), [updatePreferences])
+  const setGroupBy = useCallback((v: GroupBy) => updatePreferences({ groupBy: v }), [updatePreferences])
+  const setSubGroupBy = useCallback((v: SubGroupBy) => updatePreferences({ subGroupBy: v }), [updatePreferences])
+  const setSortBy = useCallback((v: SortBy) => updatePreferences({ sortBy: v }), [updatePreferences])
+  const setShowCompleted = useCallback((v: boolean) => updatePreferences({ showCompleted: v }), [updatePreferences])
   const toggleSortOrder = useCallback(() => {
-    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-  }, [])
+    updatePreferences({ sortOrder: sortOrder === 'asc' ? 'desc' : 'asc' })
+  }, [sortOrder, updatePreferences])
+
+  const setFilters = useCallback((f: TaskFilters) => {
+    updateFilterPrefs({
+      project_id: f.project_id,
+      company_id: f.company_id,
+      status: f.status,
+      is_code_task: f.is_code_task,
+      is_urgent: f.is_urgent,
+      is_important: f.is_important,
+      search: f.search,
+    })
+  }, [updateFilterPrefs])
 
   const clearFilters = useCallback(() => {
-    setFilters({})
-  }, [])
+    updateFilterPrefs({
+      project_id: undefined, company_id: undefined, status: undefined,
+      is_code_task: undefined, is_urgent: undefined, is_important: undefined,
+      search: undefined,
+    })
+  }, [updateFilterPrefs])
 
   // ─── groupTasks ──────────────────────────────────
 
@@ -111,7 +151,6 @@ export function useTasksView() {
 
       switch (groupBy) {
         case 'project': {
-          // Initialize with tasks' projects + a fallback
           groups.set('no_project', { label: 'Sans projet', color: '#64748b', tasks: [] })
           for (const task of tasks) {
             const key = task.project_id ?? 'no_project'
@@ -212,7 +251,6 @@ export function useTasksView() {
       sorted.sort((a, b) => {
         switch (sortBy) {
           case 'due_date': {
-            // Nulls last regardless of sort direction
             if (!a.due_date && !b.due_date) return 0
             if (!a.due_date) return 1
             if (!b.due_date) return -1
@@ -230,7 +268,7 @@ export function useTasksView() {
               if (t.is_important) return 1
               return 0
             }
-            return dir * (score(b) - score(a)) // Higher score = more urgent
+            return dir * (score(b) - score(a))
           }
 
           case 'created_at': {
@@ -248,25 +286,9 @@ export function useTasksView() {
   )
 
   return {
-    // State
-    viewMode,
-    groupBy,
-    subGroupBy,
-    sortBy,
-    sortOrder,
-    filters,
-    showCompleted,
-    // Setters
-    setViewMode,
-    setGroupBy,
-    setSubGroupBy,
-    setSortBy,
-    toggleSortOrder,
-    setFilters,
-    setShowCompleted,
-    clearFilters,
-    // Functions
-    groupTasks,
-    sortTasks,
+    viewMode, groupBy, subGroupBy, sortBy, sortOrder, filters, showCompleted,
+    setViewMode, setGroupBy, setSubGroupBy, setSortBy, toggleSortOrder,
+    setFilters, setShowCompleted, clearFilters,
+    groupTasks, sortTasks,
   }
 }

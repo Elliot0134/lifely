@@ -118,7 +118,7 @@ const categories: CategoryConfig[] = [
       { title: "Statistiques", url: "/tasks/stats", icon: ChartPie },
       { title: "Habitudes", url: "/habits", icon: Repeat, comingSoon: true },
       { title: "Objectifs", url: "/goals", icon: Target, comingSoon: true },
-      { title: "Notes", url: "/notes", icon: BookOpen, comingSoon: true },
+      { title: "Notes", url: "/notes", icon: BookOpen },
       { title: "Calendrier", url: "/calendar", icon: CalendarClock, comingSoon: true },
     ],
   },

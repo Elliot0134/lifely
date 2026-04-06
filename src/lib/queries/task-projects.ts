@@ -1,20 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import type { Project, CreateProjectInput, UpdateProjectInput } from '@/types/tasks'
+import type { Project, ProjectFilters, CreateProjectInput, UpdateProjectInput } from '@/types/tasks'
 
 // Query Keys Factory
 export const projectKeys = {
   all: ['projects'] as const,
   lists: () => [...projectKeys.all, 'list'] as const,
-  list: (filters: { company_id?: string; status?: string }) =>
+  list: (filters: ProjectFilters) =>
     [...projectKeys.lists(), filters] as const,
   details: () => [...projectKeys.all, 'detail'] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
 }
 
 // Fetch functions
-async function fetchProjects(filters: { company_id?: string; status?: string } = {}): Promise<Project[]> {
+async function fetchProjects(filters: ProjectFilters = {}): Promise<Project[]> {
   const supabase = createClient()
 
   let query = supabase
@@ -28,11 +28,43 @@ async function fetchProjects(filters: { company_id?: string; status?: string } =
   if (filters.status) {
     query = query.eq('status', filters.status)
   }
+  if (filters.search) {
+    query = query.ilike('name', `%${filters.search}%`)
+  }
 
   const { data, error } = await query
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  // Fetch task counts for each project
+  if (data && data.length > 0) {
+    const projectIds = data.map((p) => p.id)
+    const { data: taskCounts } = await supabase
+      .from('tasks')
+      .select('project_id, status')
+      .in('project_id', projectIds)
+
+    if (taskCounts) {
+      const countMap = new Map<string, { total: number; completed: number }>()
+      for (const task of taskCounts) {
+        if (!task.project_id) continue
+        const entry = countMap.get(task.project_id) ?? { total: 0, completed: 0 }
+        entry.total++
+        if (task.status === 'completed') entry.completed++
+        countMap.set(task.project_id, entry)
+      }
+
+      for (const project of data) {
+        const counts = countMap.get(project.id)
+        project.task_count = counts?.total ?? 0
+        project.completed_task_count = counts?.completed ?? 0
+        project.progress = project.task_count > 0
+          ? Math.round((project.completed_task_count / project.task_count) * 100)
+          : 0
+      }
+    }
   }
 
   return data as Project[]
@@ -117,7 +149,7 @@ async function deleteProject(id: string): Promise<void> {
 }
 
 // React Query Hooks
-export function useProjects(filters: { company_id?: string; status?: string } = {}) {
+export function useProjects(filters: ProjectFilters = {}) {
   return useQuery({
     queryKey: projectKeys.list(filters),
     queryFn: () => fetchProjects(filters),
