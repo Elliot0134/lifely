@@ -1,14 +1,8 @@
-const withPWA = require("next-pwa");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  turbopack: {},
 };
 
-module.exports = withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-})(nextConfig);
+// next-pwa is disabled for now (incompatible with Next.js 16 Turbopack)
+// TODO: migrate to @serwist/next when PWA support is needed
+module.exports = nextConfig;
