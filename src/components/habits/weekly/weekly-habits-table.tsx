@@ -1,0 +1,238 @@
+'use client'
+
+import { useState } from 'react'
+import { addDays, eachDayOfInterval, format, isToday } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import { GripVertical } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { HabitCompletionCheckbox } from '@/components/habits/habit-completion-checkbox'
+import { HabitDeleteDialog } from '@/components/habits/habit-delete-dialog'
+import { HabitFormModal } from '@/components/habits/habit-form-modal'
+import { HabitRowActions } from '@/components/habits/habit-row-actions'
+import { SortableHabitRows } from '@/components/habits/sortable-habit-rows'
+import { useToggleCompletion } from '@/lib/queries/habits'
+import { habitActiveDaysCount, isHabitActiveOnDate } from '@/lib/habits'
+import { cn } from '@/lib/utils'
+import type { Habit, HabitCompletion } from '@/types/habit'
+
+interface WeeklyHabitsTableProps {
+  habits: Habit[]
+  completions: HabitCompletion[]
+  weekStart: string
+}
+
+export function WeeklyHabitsTable({
+  habits,
+  completions,
+  weekStart,
+}: WeeklyHabitsTableProps) {
+  const toggle = useToggleCompletion()
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
+  const [deletingHabit, setDeletingHabit] = useState<Habit | null>(null)
+
+  if (habits.length === 0) {
+    return null
+  }
+
+  const weekStartDate = new Date(weekStart)
+  const days = eachDayOfInterval({
+    start: weekStartDate,
+    end: addDays(weekStartDate, 6),
+  })
+
+  const isCompleted = (habitId: string, isoDate: string) =>
+    completions.some(
+      (c) => c.habit_id === habitId && c.completed_date === isoDate,
+    )
+
+  const habitProgress = (habit: Habit) => {
+    const activeDays = habitActiveDaysCount(habit, days)
+    if (activeDays === 0) return 0
+    const done = days.reduce((acc, d) => {
+      if (!isHabitActiveOnDate(habit, d)) return acc
+      const iso = format(d, 'yyyy-MM-dd')
+      return acc + (isCompleted(habit.id, iso) ? 1 : 0)
+    }, 0)
+    return Math.round((done / activeDays) * 100)
+  }
+
+  return (
+    <Card className="bg-card">
+      <CardHeader>
+        <CardTitle className="text-base">Suivi des habitudes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="sticky left-0 z-10 bg-background min-w-[180px] py-2">
+                  Habitude
+                </TableHead>
+                {days.map((d) => {
+                  const today = isToday(d)
+                  return (
+                    <TableHead
+                      key={d.toISOString()}
+                      className={cn(
+                        'text-center py-2',
+                        today && 'bg-muted/30',
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'mx-auto flex w-10 flex-col items-center rounded-md py-1',
+                          today &&
+                            'ring-1 ring-[hsl(var(--color-habit-done))]/40',
+                        )}
+                      >
+                        <span className="text-xs font-semibold capitalize leading-none">
+                          {format(d, 'EEE', { locale: fr })}
+                        </span>
+                        <span className="mt-0.5 text-[10px] text-muted-foreground leading-none">
+                          {format(d, 'd')}
+                        </span>
+                      </div>
+                    </TableHead>
+                  )
+                })}
+                <TableHead className="min-w-[120px] py-2 text-right">
+                  Progression
+                </TableHead>
+                <TableHead className="w-10 py-2" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <SortableHabitRows habits={habits}>
+                {({ habit, setNodeRef, style, dragHandleProps, isDragging }) => {
+                  const progress = habitProgress(habit)
+                  return (
+                    <TableRow
+                      key={habit.id}
+                      ref={setNodeRef}
+                      style={style}
+                      className="group"
+                    >
+                      <TableCell className="sticky left-0 z-10 bg-background min-w-[180px] max-w-[220px] py-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <button
+                            type="button"
+                            className={cn(
+                              'flex h-6 w-4 shrink-0 items-center justify-center text-muted-foreground touch-none',
+                              'opacity-0 group-hover:opacity-100 transition-opacity',
+                              isDragging ? 'cursor-grabbing opacity-100' : 'cursor-grab',
+                            )}
+                            aria-label={`Réordonner ${habit.name}`}
+                            {...dragHandleProps.attributes}
+                            {...dragHandleProps.listeners}
+                          >
+                            <GripVertical className="h-4 w-4" />
+                          </button>
+                          {habit.emoji && (
+                            <span
+                              className="text-base leading-none"
+                              aria-hidden="true"
+                            >
+                              {habit.emoji}
+                            </span>
+                          )}
+                          <span className="truncate text-sm font-medium">
+                            {habit.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      {days.map((d) => {
+                        const iso = format(d, 'yyyy-MM-dd')
+                        const today = isToday(d)
+                        const active = isHabitActiveOnDate(habit, d)
+                        if (!active) {
+                          return (
+                            <TableCell
+                              key={iso}
+                              className={cn(
+                                'text-center py-2',
+                                today && 'bg-muted/30',
+                              )}
+                              aria-label={`Inactif pour ${habit.name}`}
+                            >
+                              <span
+                                className="text-xs text-muted-foreground/40 select-none"
+                                aria-hidden="true"
+                              >
+                                —
+                              </span>
+                            </TableCell>
+                          )
+                        }
+                        const checked = isCompleted(habit.id, iso)
+                        return (
+                          <TableCell
+                            key={iso}
+                            className={cn(
+                              'text-center py-2',
+                              today && 'bg-muted/30',
+                            )}
+                          >
+                            <div className="flex items-center justify-center">
+                              <HabitCompletionCheckbox
+                                size="sm"
+                                checked={checked}
+                                onChange={() =>
+                                  toggle.mutate({ habitId: habit.id, date: iso })
+                                }
+                                aria-label={`${habit.name} — ${format(d, 'EEEE d MMMM', { locale: fr })}`}
+                              />
+                            </div>
+                          </TableCell>
+                        )
+                      })}
+                      <TableCell className="min-w-[120px] py-2">
+                        <div className="flex items-center justify-end gap-2">
+                          <Progress value={progress} className="w-20" />
+                          <span className="w-9 text-right text-xs tabular-nums text-muted-foreground">
+                            {progress}%
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-10 py-2 text-right">
+                        <HabitRowActions
+                          habit={habit}
+                          onEdit={setEditingHabit}
+                          onDelete={setDeletingHabit}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                }}
+              </SortableHabitRows>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+
+      {editingHabit && (
+        <HabitFormModal
+          mode="edit"
+          habit={editingHabit}
+          open={editingHabit !== null}
+          onOpenChange={(o) => !o && setEditingHabit(null)}
+        />
+      )}
+
+      <HabitDeleteDialog
+        habit={deletingHabit}
+        onOpenChange={(o) => !o && setDeletingHabit(null)}
+      />
+    </Card>
+  )
+}

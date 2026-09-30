@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Edit, Trash2, Plus } from 'lucide-react'
 import { useCategories } from '@/lib/queries'
 import { getTransactionTypeColor, getTransactionTypeLabel } from '@/lib/utils'
+import type { TransactionType } from '@/types'
 
 export function CategoryList() {
   const { data, isLoading, error } = useCategories()
@@ -63,7 +64,7 @@ export function CategoryList() {
   }
 
   // Types de transaction pour organiser l'affichage
-  const transactionTypes = [
+  const transactionTypes: { key: TransactionType; label: string; color: string }[] = [
     { key: 'revenue', label: 'Revenus', color: getTransactionTypeColor('revenue') },
     { key: 'variable_expense', label: 'Dépenses variables', color: getTransactionTypeColor('variable_expense') },
     { key: 'fixed_expense', label: 'Charges fixes', color: getTransactionTypeColor('fixed_expense') },
@@ -96,7 +97,7 @@ export function CategoryList() {
             <CardContent>
               {typeCategories.length > 0 ? (
                 <div className="space-y-3">
-                  {typeCategories.map((category: any) => (
+                  {typeCategories.map((category) => (
                     <div
                       key={category.id}
                       className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/50 transition-colors"

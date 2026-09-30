@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import type { Account } from '@/types'
+
 // Types pour les API
 interface CreateAccountData {
   name: string
@@ -22,8 +24,12 @@ export const accountKeys = {
   detail: (id: string) => [...accountKeys.details(), id] as const,
 }
 
+interface AccountsResponse {
+  data: Account[]
+}
+
 // API Functions
-async function fetchAccounts() {
+async function fetchAccounts(): Promise<AccountsResponse> {
   const response = await fetch('/api/accounts')
 
   if (!response.ok) {
@@ -147,5 +153,5 @@ export function useDefaultAccount() {
 
   if (!accountsData?.data) return null
 
-  return accountsData.data.find((account: any) => account.is_default) || accountsData.data[0]
+  return accountsData.data.find((account) => account.is_default) || accountsData.data[0]
 }

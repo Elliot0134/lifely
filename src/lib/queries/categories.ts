@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import type { Account, Category } from '@/types'
+
 // Types pour les API
 interface CategoryFilters {
   transaction_type?: string
@@ -34,8 +36,18 @@ export const categoryKeys = {
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
 
+// GET /api/categories joins the owning account (id, name, type)
+export type CategoryWithAccount = Category & {
+  account: Pick<Account, 'id' | 'name' | 'type'> | null
+}
+
+interface CategoriesResponse {
+  data: CategoryWithAccount[]
+  grouped: Partial<Record<Category['transaction_type'], CategoryWithAccount[]>>
+}
+
 // API Functions
-async function fetchCategories(filters: CategoryFilters = {}) {
+async function fetchCategories(filters: CategoryFilters = {}): Promise<CategoriesResponse> {
   const params = new URLSearchParams()
 
   Object.entries(filters).forEach(([key, value]) => {

@@ -28,7 +28,10 @@ export async function updateSession(request: NextRequest) {
   )
 
   // refreshing the auth token
-  await supabase.auth.getUser()
+  const { error } = await supabase.auth.getUser()
+  if (error && error.name !== 'AuthSessionMissingError') {
+    console.warn('[supabase middleware] session refresh failed:', error.message)
+  }
 
   return supabaseResponse
 }

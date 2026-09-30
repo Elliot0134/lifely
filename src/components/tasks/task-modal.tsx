@@ -316,46 +316,13 @@ export function TaskModal({
                 <FormField
                   control={form.control}
                   name="estimated_minutes"
-                  render={({ field }) => {
-                    const [expanded, setExpanded] = useState(!field.value)
-                    return (
-                      <FormItem>
-                        <FormLabel className="text-xs text-muted-foreground">Estimation</FormLabel>
-                        {!expanded && field.value ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-7 w-fit px-3 text-xs"
-                            onClick={() => setExpanded(true)}
-                          >
-                            {TIME_ESTIMATION_PRESETS.find((p) => p.value === field.value)?.label ?? `${field.value} min`}
-                          </Button>
-                        ) : (
-                          <div className="flex flex-wrap gap-1.5">
-                            {TIME_ESTIMATION_PRESETS.map((preset) => (
-                              <Button
-                                key={preset.value}
-                                type="button"
-                                variant={field.value === preset.value ? 'default' : 'outline'}
-                                size="sm"
-                                className="h-7 px-2.5 text-xs"
-                                onClick={() => {
-                                  field.onChange(
-                                    field.value === preset.value ? undefined : preset.value
-                                  )
-                                  setExpanded(false)
-                                }}
-                              >
-                                {preset.label}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Estimation</FormLabel>
+                      <EstimationPicker value={field.value} onChange={field.onChange} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 {/* Tags */}
@@ -440,4 +407,50 @@ function getDefaultValues(
     estimated_minutes: undefined,
     tag_ids: [],
   }
+}
+
+// ─── Estimation picker ──────────────────────────────────
+
+interface EstimationPickerProps {
+  value: number | undefined
+  onChange: (value: number | undefined) => void
+}
+
+// Own component so its local state doesn't live inside a FormField render callback.
+function EstimationPicker({ value, onChange }: EstimationPickerProps) {
+  const [expanded, setExpanded] = useState(!value)
+
+  if (!expanded && value) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-7 w-fit px-3 text-xs"
+        onClick={() => setExpanded(true)}
+      >
+        {TIME_ESTIMATION_PRESETS.find((p) => p.value === value)?.label ?? `${value} min`}
+      </Button>
+    )
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {TIME_ESTIMATION_PRESETS.map((preset) => (
+        <Button
+          key={preset.value}
+          type="button"
+          variant={value === preset.value ? 'default' : 'outline'}
+          size="sm"
+          className="h-7 px-2.5 text-xs"
+          onClick={() => {
+            onChange(value === preset.value ? undefined : preset.value)
+            setExpanded(false)
+          }}
+        >
+          {preset.label}
+        </Button>
+      ))}
+    </div>
+  )
 }

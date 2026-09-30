@@ -55,7 +55,7 @@ export function BudgetModal({ trigger }: BudgetModalProps) {
 
   // Filtrer seulement les catégories de dépenses pour les budgets
   const categories = (categoriesData?.data || []).filter(
-    (cat: any) => cat.transaction_type === 'variable_expense' || cat.transaction_type === 'fixed_expense'
+    (cat) => cat.transaction_type === 'variable_expense' || cat.transaction_type === 'fixed_expense'
   )
   const accounts = accountsData?.data || []
 
@@ -152,7 +152,7 @@ export function BudgetModal({ trigger }: BudgetModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category: any) => (
+                      {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <span className="flex items-center gap-2">
                             <span>{category.icon}</span>
@@ -181,7 +181,7 @@ export function BudgetModal({ trigger }: BudgetModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {accounts.map((account: any) => (
+                      {accounts.map((account) => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.name}
                         </SelectItem>

@@ -69,7 +69,7 @@ export function TransactionModal({ trigger }: TransactionModalProps) {
 
   const selectedType = form.watch('type')
   const filteredCategories = categories.filter(
-    (category: any) => category.transaction_type === selectedType
+    (category) => category.transaction_type === selectedType
   )
 
   const onSubmit = (data: TransactionInput) => {
@@ -195,7 +195,7 @@ export function TransactionModal({ trigger }: TransactionModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {filteredCategories.map((category: any) => (
+                      {filteredCategories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <span className="flex items-center gap-2">
                             <span>{category.icon}</span>
@@ -224,7 +224,7 @@ export function TransactionModal({ trigger }: TransactionModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {accounts.map((account: any) => (
+                      {accounts.map((account) => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.name}
                         </SelectItem>

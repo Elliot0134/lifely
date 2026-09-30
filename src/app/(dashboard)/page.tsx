@@ -35,7 +35,7 @@ export default function DashboardPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">Tableau de bord</h1>
           <p className="text-muted-foreground">
-            Vue d'ensemble de vos finances personnelles
+            Vue d&apos;ensemble de vos finances personnelles
           </p>
         </div>
 
