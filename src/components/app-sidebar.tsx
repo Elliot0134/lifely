@@ -81,7 +81,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
   }
 
   return (
-    <div className="sticky top-0 hidden h-svh shrink-0 md:flex">
+    // z-20: `sticky` creates a stacking context, so without it the rail's
+    // fixed peek (z-50 inside this context) would render under the content card.
+    <div className="sticky top-0 z-20 hidden h-svh shrink-0 md:flex">
       <motion.div
         initial={false}
         animate={{ width: open ? COLUMN_WIDTH_PX : RAIL_WIDTH_PX }}
