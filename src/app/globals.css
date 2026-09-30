@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source "../../node_modules/calendarkit-pro";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -184,6 +186,9 @@
   --color-positive: #8b9a6b;         /* Olive sage - hausse */
   --color-negative: #c45c5c;         /* Muted red - baisse */
   --color-neutral: #8e8a83;          /* Warm gray - stable */
+
+  /* Habit tracker - completion green (HSL components for hsl(var(...))) */
+  --color-habit-done: 142 76% 36%;
 }
 
 /* Tiptap styles are in /src/styles/tiptap-editor.css (imported by NoteEditor component) */
@@ -202,4 +207,81 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===== PLANNING / CALENDARKIT-PRO — NOTION CAL STYLE ===== */
+/* Scope all overrides under .planning-scheduler to avoid side-effects */
+
+.planning-scheduler {
+  /* Event blocks: left border + subtle fill */
+}
+
+.planning-scheduler [class*="event"][class*="block"],
+.planning-scheduler [data-event],
+.planning-scheduler [role="button"][class*="Event"] {
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  padding: 3px 6px !important;
+}
+
+/* Time gutter tighter + smaller */
+.planning-scheduler [class*="time-gutter"],
+.planning-scheduler [class*="timeGutter"],
+.planning-scheduler [class*="hour-label"] {
+  font-size: 11px !important;
+  color: var(--muted-foreground) !important;
+}
+
+/* Grid lines softer */
+.planning-scheduler [class*="grid"] [class*="line"],
+.planning-scheduler [class*="hour-row"],
+.planning-scheduler [class*="slot"] {
+  border-color: color-mix(in srgb, var(--border) 50%, transparent) !important;
+}
+
+/* Today cell highlight (mini-month & grid) */
+.planning-scheduler [data-today="true"] {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+
+/* Weekend cells slightly darker in dark mode */
+.dark .planning-scheduler [data-weekend="true"] {
+  background-color: color-mix(in srgb, var(--muted) 35%, transparent) !important;
+}
+
+/* Hover empty slot feedback */
+.planning-scheduler [class*="slot"]:hover {
+  background-color: color-mix(in srgb, var(--accent) 30%, transparent) !important;
+}
+
+/* Current time line — red with small dot */
+.planning-scheduler [class*="current-time"],
+.planning-scheduler [class*="now-indicator"] {
+  background-color: #ef4444 !important;
+  height: 1.5px !important;
+}
+.planning-scheduler [class*="current-time"]::before,
+.planning-scheduler [class*="now-indicator"]::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: -4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background-color: #ef4444 !important;
+}
+
+/* Drag feedback — soft glow on dragged event */
+.planning-scheduler [class*="dragging"] {
+  opacity: 0.7 !important;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--foreground) 15%, transparent) !important;
+}
+
+/* Drop zone feedback (inbox drop) */
+.planning-scheduler[data-dropping="true"] [class*="slot"]:hover {
+  outline: 1.5px dashed var(--primary) !important;
+  outline-offset: -2px !important;
 }

@@ -47,6 +47,8 @@ function buildSubGroups(tasks: Task[], by: SubGroupBy): Map<string, TaskSubGroup
     for (const task of tasks) {
       subs.get(task.status)?.tasks.push(task)
     }
+    // Statuts : toujours afficher toutes les colonnes (même vides)
+    return subs
   } else if (by === 'urgency') {
     for (const q of EISENHOWER_QUADRANTS) {
       subs.set(q.key, { label: q.label, color: q.color, tasks: [] })
@@ -59,11 +61,8 @@ function buildSubGroups(tasks: Task[], by: SubGroupBy): Map<string, TaskSubGroup
       else key = 'none'
       subs.get(key)?.tasks.push(task)
     }
-  }
-
-  // Remove empty sub-groups
-  for (const [key, sub] of subs) {
-    if (sub.tasks.length === 0) subs.delete(key)
+    // Urgence : toujours afficher les 4 quadrants
+    return subs
   }
 
   return subs

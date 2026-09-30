@@ -9,7 +9,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Toujours utiliser cette fonction pour formater les montants
-export function formatCurrency(amount: number, type?: TransactionType): string {
+export function formatCurrency(
+  amount: number | null | undefined,
+  type?: TransactionType,
+): string {
+  if (amount == null || typeof amount !== 'number' || !Number.isFinite(amount)) {
+    return '—'
+  }
+
   const formatted = new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR',
@@ -21,8 +28,14 @@ export function formatCurrency(amount: number, type?: TransactionType): string {
   return formatted
 }
 
-export function formatDate(date: string | Date, formatString: string = 'dd/MM/yyyy'): string {
-  return format(new Date(date), formatString, { locale: fr })
+export function formatDate(
+  date: string | Date | null | undefined,
+  formatString: string = 'dd/MM/yyyy',
+): string {
+  if (!date) return '—'
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return '—'
+  return format(d, formatString, { locale: fr })
 }
 
 export function formatDateRelative(date: string | Date): string {

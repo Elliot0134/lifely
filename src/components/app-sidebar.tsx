@@ -112,11 +112,11 @@ const categories: CategoryConfig[] = [
     icon: ListTodo,
     items: [
       { title: "Tâches", url: "/tasks", icon: ListTodo },
-      { title: "Planning", url: "/tasks/schedule", icon: CalendarClock },
+      { title: "Planning", url: "/planning", icon: CalendarClock },
       { title: "Projets", url: "/projects", icon: FolderKanban },
       { title: "Entreprises", url: "/companies", icon: Building2 },
       { title: "Statistiques", url: "/tasks/stats", icon: ChartPie },
-      { title: "Habitudes", url: "/habits", icon: Repeat, comingSoon: true },
+      { title: "Habitudes", url: "/habits", icon: Repeat },
       { title: "Objectifs", url: "/goals", icon: Target, comingSoon: true },
       { title: "Notes", url: "/notes", icon: BookOpen },
       { title: "Calendrier", url: "/calendar", icon: CalendarClock, comingSoon: true },

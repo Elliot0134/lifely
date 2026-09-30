@@ -4,7 +4,8 @@ import {
   Target,
   Tag,
   Settings,
-  Plus
+  Plus,
+  Sparkles
 } from "lucide-react"
 
 export const dashboardNavigation = [
@@ -31,6 +32,12 @@ export const dashboardNavigation = [
     href: "/dashboard/categories",
     icon: Tag,
     description: "Organiser vos transactions",
+  },
+  {
+    title: "Habitudes",
+    href: "/habits",
+    icon: Sparkles,
+    description: "Suivre vos habitudes quotidiennes",
   },
 ]
 

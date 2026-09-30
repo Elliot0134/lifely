@@ -3,6 +3,9 @@
 // Re-export billing types from config/plans
 export type { BillingPeriod, PlanId, SubscriptionStatus, Plan, Subscription, PlanLimits, PlanPrice } from '@/config/plans'
 
+// Re-export habit types
+export type { Habit, HabitCompletion, CreateHabitInput, UpdateHabitInput, HabitWithCompletions } from './habit'
+
 export type TransactionType = 'revenue' | 'variable_expense' | 'fixed_expense' | 'credit' | 'savings'
 export type RecurrenceFrequency = 'monthly' | 'weekly' | 'yearly'
 export type AccountType = 'personal' | 'business'

@@ -45,3 +45,8 @@ tasks/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase
+supabase/.temp/
+# personal seed data (public repo)
+supabase/seed/

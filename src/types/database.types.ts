@@ -312,6 +312,179 @@ export type Database = {
           },
         ]
       }
+      external_calendar_connections: {
+        Row: {
+          access_token: string
+          account_email: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          provider: string
+          refresh_token: string | null
+          scopes: string[] | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_email?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_email?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      external_events: {
+        Row: {
+          all_day: boolean
+          calendar_name: string | null
+          color: string | null
+          created_at: string
+          description: string | null
+          end_at: string
+          html_link: string | null
+          id: string
+          last_synced_at: string
+          location: string | null
+          source: string
+          source_event_id: string
+          start_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          all_day?: boolean
+          calendar_name?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_at: string
+          html_link?: string | null
+          id?: string
+          last_synced_at?: string
+          location?: string | null
+          source: string
+          source_event_id: string
+          start_at: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          all_day?: boolean
+          calendar_name?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_at?: string
+          html_link?: string | null
+          id?: string
+          last_synced_at?: string
+          location?: string | null
+          source?: string
+          source_event_id?: string
+          start_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habit_completions: {
+        Row: {
+          completed_date: string
+          created_at: string
+          habit_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed_date: string
+          created_at?: string
+          habit_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          habit_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          active_days: number[]
+          archived_at: string | null
+          color: string | null
+          created_at: string
+          emoji: string | null
+          id: string
+          name: string
+          order_index: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_days?: number[]
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_days?: number[]
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       note_tags: {
         Row: {
           note_id: string
@@ -384,8 +557,10 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          calendar_timezones: Json | null
           created_at: string | null
           currency: string | null
+          deep_work_weekly_goal_hours: number | null
           email: string
           full_name: string | null
           id: string
@@ -393,8 +568,10 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          calendar_timezones?: Json | null
           created_at?: string | null
           currency?: string | null
+          deep_work_weekly_goal_hours?: number | null
           email: string
           full_name?: string | null
           id: string
@@ -402,8 +579,10 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          calendar_timezones?: Json | null
           created_at?: string | null
           currency?: string | null
+          deep_work_weekly_goal_hours?: number | null
           email?: string
           full_name?: string | null
           id?: string
@@ -728,6 +907,7 @@ export type Database = {
           estimated_minutes: number | null
           id: string
           is_code_task: boolean
+          is_deep_work: boolean | null
           is_important: boolean
           is_urgent: boolean
           parent_task_id: string | null
@@ -752,6 +932,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_code_task?: boolean
+          is_deep_work?: boolean | null
           is_important?: boolean
           is_urgent?: boolean
           parent_task_id?: string | null
@@ -776,6 +957,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_code_task?: boolean
+          is_deep_work?: boolean | null
           is_important?: boolean
           is_urgent?: boolean
           parent_task_id?: string | null

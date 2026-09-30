@@ -116,6 +116,7 @@ export interface Task {
   body: string | null
   status: TaskStatus
   is_code_task: boolean
+  is_deep_work: boolean
   due_date: string | null
   due_datetime: string | null
   is_urgent: boolean
@@ -189,6 +190,7 @@ export interface CreateTaskInput {
   project_id?: string
   parent_task_id?: string
   is_code_task?: boolean
+  is_deep_work?: boolean
   due_date?: string
   due_datetime?: string
   is_urgent?: boolean
@@ -209,6 +211,7 @@ export interface UpdateTaskInput {
   parent_task_id?: string | null
   status?: TaskStatus
   is_code_task?: boolean
+  is_deep_work?: boolean
   due_date?: string | null
   due_datetime?: string | null
   is_urgent?: boolean
