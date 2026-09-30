@@ -285,3 +285,18 @@
   outline: 1.5px dashed var(--primary) !important;
   outline-offset: -2px !important;
 }
+
+/* ─── Sidebar: universe tint (ported from Aurentia) ───────────────
+   A universe with a hex colour sets `--u-color` + `data-universe-tint`;
+   only icons marked `.universe-tint-icon` read it. */
+.universe-rail-btn { color: var(--u-color); }
+.universe-rail-btn[data-active="true"] { background: var(--u-color); color: #fff; }
+.dark .universe-rail-btn { color: color-mix(in srgb, var(--u-color) 65%, white); }
+.dark .universe-rail-btn[data-active="true"] { background: var(--u-color); color: #fff; }
+
+[data-universe-tint] { --u-ink: var(--u-color); }
+.dark [data-universe-tint] { --u-ink: color-mix(in srgb, var(--u-color) 65%, white); }
+.universe-tint-icon { color: var(--u-ink, currentColor); }
+
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

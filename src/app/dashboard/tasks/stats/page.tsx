@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function LegacyTaskStatsPage() {
-  redirect('/tasks')
+  redirect('/tasks/stats')
 }

@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AppSidebar } from '@/components/app-sidebar'
@@ -36,10 +37,14 @@ export default async function DashboardLayout({
     avatar: profile?.avatar_url,
   }
 
+  // Expanded unless the user collapsed it (cookie written by SidebarProvider)
+  const cookieStore = await cookies()
+  const defaultOpen = cookieStore.get('sidebar_state')?.value !== 'false'
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={defaultOpen} className="bg-sidebar">
       <AppSidebar user={userData} />
-      <SidebarInset className="flex-1 min-w-0 pb-20 md:pb-0">
+      <SidebarInset className="min-w-0 pb-20 md:m-2 md:ml-0 md:rounded-xl md:pb-0">
         {children}
       </SidebarInset>
       <MobileBottomNav />

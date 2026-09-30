@@ -96,7 +96,7 @@ export function RecentTransactions() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-base font-semibold">Transactions recentes</CardTitle>
         <Link
-          href="/dashboard/transactions"
+          href="/transactions"
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Voir tout
